@@ -1,0 +1,68 @@
+datasets/
+├── SegTHRawS_dataset
+│   ├── images
+│   │   ├── event
+│   │   │   ├── NIR1
+│   │   │   ├── NIR_SWIR
+│   │   │   ├── RGB
+│   │   │   └── Vegetation
+│   │   ├── notevent
+│   │   │   ├── NIR1
+│   │   │   ├── NIR_SWIR
+│   │   │   ├── RGB
+│   │   │   └── Vegetation
+│   │   └── potential_event
+│   │       ├── NIR1
+│   │       ├── NIR_SWIR
+│   │       ├── RGB
+│   │       └── Vegetation
+│   └── masks
+│       ├── event
+│       │   ├── Castro-Traba
+│       │   ├── comparison
+│       │   │   ├── comparison_plot
+│       │   │   │   ├── intersection
+│       │   │   │   └── voting_4
+│       │   │   ├── intersection
+│       │   │   ├── voting_2
+│       │   │   ├── voting_3
+│       │   │   └── voting_4
+│       │   ├── Kumar-Roy
+│       │   ├── Massimetti
+│       │   ├── Murphy
+│       │   └── Schroeder
+│       ├── potential_event
+│       │   ├── Castro-Traba
+│       │   ├── comparison
+│       │   │   ├── comparison_plot
+│       │   │   │   ├── voting_2
+│       │   │   │   └── voting_3
+│       │   │   ├── voting_2
+│       │   │   └── voting_3
+│       │   ├── Kumar-Roy
+│       │   ├── Massimetti
+│       │   ├── Murphy
+│       │   └── Schroeder
+│       └── weakly_segmentation
+├── train_geo_split_dataset
+│   ├── test
+│   │   ├── images
+│   │   └── masks
+│   ├── train
+│   │   ├── images
+│   │   └── masks
+│   └── val
+│       ├── images
+│       └── masks
+└── train_random_split_dataset
+    ├── test
+    │   ├── images
+    │   └── masks
+    ├── train
+    │   ├── images
+    │   └── masks
+    └── val
+        ├── images
+        └── masks
+
+66 directories
