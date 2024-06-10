@@ -18,7 +18,8 @@ PATCH_STEP = 192 # This ensures an overlap of 25% in each direction
 # data_path = os.path.join(pyraws_path, "data", "raw")
 
 # thraws_data_path = '/home/cristopher/Documents/PyRawS/data/raw/'
-thraws_data_path = '/media/cristopher/fbd12065-9eb2-4d02-8a65-1216bb0d6c22/THRawS'
+# thraws_data_path = '/media/cristopher/fbd12065-9eb2-4d02-8a65-1216bb0d6c22/THRawS'
+thraws_data_path = '/media/cristopher/SansDisk1TB/THRawS_dataset'
 
 # DATASET_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'datasets','main_dataset')
 DATASET_PATH = os.path.join(os.path.dirname(thraws_data_path),'datasets','main_dataset')
@@ -104,6 +105,11 @@ plot_names = ['NIR_SWIR image','Castro-Traba','Massimetti','Murphy','Schroeder',
 
 mask_generation_functions = (Castro_Traba_conditions,Massimetti_conditions,Murphy_conditions,Schroeder_conditions,Kumar_Roy_conditions)
 
+band_combinations_dict ={
+    "NIR_SWIR": ["B12","B11","B8A"],
+    "RGB": ["B04","B03","B02"],
+    "VNIR": ["B07","B06","B05"]
+}
 
 # if __name__ == '__main__':
 #     print(os.listdir(MAIN_DIRECTORY))

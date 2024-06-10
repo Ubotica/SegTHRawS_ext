@@ -5,7 +5,7 @@ import random
 import argparse
 import numpy as np
 
-from constants import DATASET_PATH
+from constants import DATASET_PATH, band_combinations_dict
 
 def create_dataset_folders(new_dataset_path):
     
@@ -17,6 +17,7 @@ def create_dataset_folders(new_dataset_path):
 def split_events(new_dataset_path: str,
                  dataset_path: str = DATASET_PATH,
                  weakly: bool = False,
+                 input_band_combination: list = ["B12",'B11',"B8A"],
                  train_split_ratio: float = 0.8,
                  val_split_ratio: float = 0.1,
                  test_split_ratio: float = 0.1,
@@ -35,7 +36,7 @@ def split_events(new_dataset_path: str,
 
 
     masks_path = os.path.join(dataset_path,'masks','weakly_segmentation')
-    events_path = os.path.join(dataset_path,'images','event','NIR_SWIR')
+    # events_path = os.path.join(dataset_path,'images','event','NIR_SWIR')
 
 
     if not new_dataset_path:
@@ -56,17 +57,33 @@ def split_events(new_dataset_path: str,
     test_idx = 0
 
     for idx,mask_name in enumerate(masks_paths_shuffle):
-        patch_name = re.match(r'(.+)_mask',mask_name).group(1)
-        patch_name = mask_name.replace('mask_weakly','NIR_SWIR')
+        # patch_name = mask_name.replace('mask_weakly','NIR_SWIR')
         
-        with open(os.path.join(events_path,patch_name),'rb') as image_file:
-            image = pickle.load(image_file)
+        final_image = []
+        for band in input_band_combination:
+            for band_name,band_values in zip(band_combinations_dict.keys(),band_combinations_dict.values()):
+                if band in band_values:
+
+                    patch_name = mask_name.replace('mask_weakly',band_name)
+                    image_path = os.path.join(dataset_path,'images','event',band_name,patch_name)
+                    with open(image_path,'rb') as image_file:
+                        image = pickle.load(image_file)
+
+                    final_image.append(image[:,:,band_values.index(band)])
+                    break
+            
+        image = np.transpose(np.array(final_image),(1,2,0))
+
+        # with open(os.path.join(events_path,patch_name),'rb') as image_file:
+        #     image = pickle.load(image_file)
 
         with open(os.path.join(masks_path,mask_name),'rb') as mask_file:
             mask = pickle.load(mask_file)
 
         if not weakly: #For supervised binary segmentation
             mask[mask == -1] = 0
+
+        patch_name = patch_name.replace(f'_{band_name}',"")
 
         if idx< train_max_idx:
 
@@ -102,6 +119,7 @@ def split_events(new_dataset_path: str,
 
 def split_notevents(new_dataset_path: str,
                     dataset_path: str = DATASET_PATH,
+                    input_band_combination: list = ["B12","B11","B8A"],                    
                     train_split_ratio: float = 0.8,
                     val_split_ratio: float = 0.1,
                     test_split_ratio: float = 0.1,
@@ -161,14 +179,29 @@ def split_notevents(new_dataset_path: str,
                         
             scene_names_list.append(scene_name)
 
-            with open(os.path.join(notevents_path,image_name),'rb') as image_file:
-                image = pickle.load(image_file)
+            final_image = []
+            for band in input_band_combination:
+                for band_name,band_values in zip(band_combinations_dict.keys(),band_combinations_dict.values()):
+                    if band in band_values:
+
+                        patch_name = image_name.replace('NIR_SWIR',band_name)
+                        image_path = os.path.join(dataset_path,'images','notevent',band_name,patch_name)
+                        with open(image_path,'rb') as image_file:
+                            image = pickle.load(image_file)
+
+                        final_image.append(image[:,:,band_values.index(band)])
+                        break
+
+            image = np.transpose(np.array(final_image),(1,2,0))
+
+            # with open(os.path.join(notevents_path,image_name),'rb') as image_file:
+            #     image = pickle.load(image_file)
 
             if cont_end_loop<= train_max_cont_end_loop:
 
                 with open(os.path.join(new_dataset_path,'train','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                     mask.tofile(file)
-                with open(os.path.join(new_dataset_path,'train','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                with open(os.path.join(new_dataset_path,'train','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                     image.tofile(file)
 
                 cont_end_loop +=1
@@ -178,7 +211,7 @@ def split_notevents(new_dataset_path: str,
 
                 with open(os.path.join(new_dataset_path,'val','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                     mask.tofile(file)
-                with open(os.path.join(new_dataset_path,'val','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                with open(os.path.join(new_dataset_path,'val','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                     image.tofile(file)
                 
                 cont_end_loop +=1
@@ -189,7 +222,7 @@ def split_notevents(new_dataset_path: str,
 
                 with open(os.path.join(new_dataset_path,'test','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                     mask.tofile(file)
-                with open(os.path.join(new_dataset_path,'test','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                with open(os.path.join(new_dataset_path,'test','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                     image.tofile(file)
 
                 cont_end_loop +=1
@@ -210,8 +243,25 @@ def split_notevents(new_dataset_path: str,
             if i == missing_test_images:
                 break
             else:
+
+                final_image = []
+                for band in input_band_combination:
+                    for band_name,band_values in zip(band_combinations_dict.keys(),band_combinations_dict.values()):
+                        if band in band_values:
+
+                            patch_name = image_name.replace('NIR_SWIR',band_name)
+                            image_path = os.path.join(dataset_path,'images','notevent',band_name,patch_name)
+                            with open(image_path,'rb') as image_file:
+                                image = pickle.load(image_file)
+
+                            final_image.append(image[:,:,band_values.index(band)])
+                            break
+
+                image = np.transpose(np.array(final_image),(1,2,0))
+
                 with open(os.path.join(new_dataset_path,'test','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                         mask.tofile(file)
+
                 with open(os.path.join(new_dataset_path,'test','images',image_name.replace('.pkl','.bin')),'wb') as file:
                     image.tofile(file)
                 cont_test += 1
@@ -222,6 +272,7 @@ def split_notevents(new_dataset_path: str,
 def generate_random_split_dataset(new_dataset_path : str = None,
                                   dataset_path : str = DATASET_PATH,
                                   weakly : int = 0,
+                                  band_combination: list = ["B12","B11","B8A"],                    
                                   train_split_ratio : float = 0.8,
                                   val_split_ratio : float = 0.1,
                                   test_split_ratio : float = 0.1,
@@ -234,11 +285,13 @@ def generate_random_split_dataset(new_dataset_path : str = None,
     split_events(dataset_path=dataset_path,
                  new_dataset_path = new_dataset_path,
                  weakly=weakly,
+                 input_band_combination=band_combination,
                  val_split_ratio= val_split_ratio,
                  seed=seed)
 
     split_notevents(dataset_path = dataset_path,
                     new_dataset_path=new_dataset_path,
+                    input_band_combination=band_combination,
                     train_split_ratio=train_split_ratio,
                     val_split_ratio=val_split_ratio,
                     test_split_ratio=test_split_ratio,
@@ -253,6 +306,7 @@ if __name__ == '__main__':
     parser.add_argument('--new_dataset_path',   type=str,   help='Path where the new dataset wants to be generated.',   default=None)
     parser.add_argument('--dataset_path',       type=str,   help='Path of the full dataset with all the patches',       default=DATASET_PATH)
     parser.add_argument('--weakly',             type=int,   help='Use weakly supervision. 1: YES. 0: NO ',              default=1,choices=[0,1])
+    parser.add_argument('--band_list',          type=str,   help='Specify the band combination for the dataset creation. Example: ["B12","B11","B8A"] ', nargs='+', default=["B12","B11","B8A"])
     parser.add_argument('--train_split_ratio',  type=float, help='Desired percentage for the training split.',          default=0.8)
     parser.add_argument('--val_split_ratio',    type=float, help='Desired percentage for the validation split.',        default=0.1)
     parser.add_argument('--test_split_ratio',   type=float, help='Desired percentage for the testing split.',           default=0.1)

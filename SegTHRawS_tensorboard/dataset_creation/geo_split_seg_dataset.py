@@ -8,7 +8,7 @@ import numpy as np
 from copy import deepcopy
 from itertools import combinations
 
-from constants import DATASET_PATH
+from constants import DATASET_PATH, band_combinations_dict
 
 def create_dataset_folders(new_dataset_path: str):
     
@@ -70,6 +70,7 @@ def geo_split_events_creation(dataset_path: str,
                               new_dataset_path: str,
                               event_scenes_dict: dict,
                               scenes_test_combination: list,
+                              input_band_combination: list = ["B12","B11","B8A"],
                               weakly: bool = False,
                               val_split_ratio: float = 0.1,
                               seed: int = 42
@@ -80,15 +81,15 @@ def geo_split_events_creation(dataset_path: str,
     if not dataset_path:
         dataset_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'datasets','main_dataset')
 
+
+    masks_path = os.path.join(dataset_path,'masks','weakly_segmentation')
+
+
     if not new_dataset_path:
         new_dataset_path = os.path.join(os.path.dirname(dataset_path),'train_geo_split_dataset')
         create_dataset_folders(new_dataset_path)
 
-    masks_path = os.path.join(dataset_path,'masks','weakly_segmentation')
-    events_path = os.path.join(dataset_path,'images','event','NIR_SWIR')
-
-    masks_paths =os.listdir(masks_path)
-    
+    masks_paths =os.listdir(masks_path)    
     random.shuffle(masks_paths)
     
     events_copy_dict = deepcopy(event_scenes_dict)
@@ -101,12 +102,22 @@ def geo_split_events_creation(dataset_path: str,
 
     for event_mask_name in masks_paths:
 
-        patch_name = re.match(r'(.+)_mask',event_mask_name).group(1)
-        patch_name = event_mask_name.replace('mask_weakly','NIR_SWIR')
-        
-        with open(os.path.join(events_path,patch_name),'rb') as image_file:
-            image = pickle.load(image_file)
+        # patch_name = re.match(r'(.+)_mask',event_mask_name).group(1)
+        final_image = []
+        for band in input_band_combination:
+            for band_name,band_values in zip(band_combinations_dict.keys(),band_combinations_dict.values()):
+                if band in band_values:
 
+                    patch_name = event_mask_name.replace('mask_weakly',band_name)
+                    image_path = os.path.join(dataset_path,'images','event',band_name,patch_name)
+                    with open(image_path,'rb') as image_file:
+                        image = pickle.load(image_file)
+
+                    final_image.append(image[:,:,band_values.index(band)])
+                    break
+            
+
+        image = np.transpose(np.array(final_image),(1,2,0))
         with open(os.path.join(masks_path,event_mask_name),'rb') as mask_file:
             mask = pickle.load(mask_file)
 
@@ -114,6 +125,9 @@ def geo_split_events_creation(dataset_path: str,
             mask[mask == -1] = 0
 
         scene_name = re.match(r'(.+)_[0-9]+_G',event_mask_name).group(1)
+
+        patch_name = patch_name.replace(f'_{band_name}',"")
+
 
         if re.match(r'(.+)_[0-9]+',scene_name): #This ensures tha scenes with multiple numbers such as Raung and Raung 1 are classified as the same
             scene_name = re.match(r'(.+)_[0-9]+',scene_name).group(1)
@@ -152,6 +166,7 @@ def geo_split_events_creation(dataset_path: str,
 
 def geo_split_notevents_creation(new_dataset_path: str,
                                  scenes_test_combination: list,
+                                 input_band_combination: list = ["B12","B11","B8A"],
                                  dataset_path: str = DATASET_PATH,
                                  train_split_ratio: float = 0.8,
                                  val_split_ratio: float = 0.1,
@@ -172,10 +187,7 @@ def geo_split_notevents_creation(new_dataset_path: str,
 
     masks_path = os.path.join(dataset_path,'masks','weakly_segmentation')
 
-    notevents_path = os.path.join(dataset_path,'images','notevent','NIR_SWIR')
-
-    notevents_paths = os.listdir(notevents_path)
-    random.shuffle(notevents_paths)
+    
 
     
     #Obtain the number of different scenes of the dataset
@@ -219,6 +231,11 @@ def geo_split_notevents_creation(new_dataset_path: str,
 
     extra_test_images = []
 
+    notevents_path = os.path.join(dataset_path,'images','notevent','NIR_SWIR') #Select any of the images directories
+
+    notevents_paths = os.listdir(notevents_path)
+    random.shuffle(notevents_paths)
+            
     for image_name in notevents_paths:
         
         scene_main_name = re.match(r'(.+)_[0-9]+_G',image_name).group(1)
@@ -235,8 +252,20 @@ def geo_split_notevents_creation(new_dataset_path: str,
         if train_idx >= train_max_idx and val_idx >= val_max_idx  and test_idx >= test_max_idx:
             break
 
-        with open(os.path.join(notevents_path,image_name),'rb') as image_file:
-            image = pickle.load(image_file)
+        final_image = []
+        for band in input_band_combination:
+            for band_name,band_values in zip(band_combinations_dict.keys(),band_combinations_dict.values()):
+                if band in band_values:
+
+                    patch_name = image_name.replace('NIR_SWIR',band_name)
+                    image_path = os.path.join(dataset_path,'images','notevent',band_name,patch_name)
+                    with open(image_path,'rb') as image_file:
+                        image = pickle.load(image_file)
+
+                    final_image.append(image[:,:,band_values.index(band)])
+                    break
+                
+        image = np.transpose(np.array(final_image),(1,2,0))
 
         ##### TESTING SPLIT #####
 
@@ -246,7 +275,7 @@ def geo_split_notevents_creation(new_dataset_path: str,
 
                 with open(os.path.join(new_dataset_path,'test','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                     mask.tofile(file)
-                with open(os.path.join(new_dataset_path,'test','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                with open(os.path.join(new_dataset_path,'test','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                     image.tofile(file)
 
                 if test_idx >= test_max_idx:
@@ -267,20 +296,20 @@ def geo_split_notevents_creation(new_dataset_path: str,
 
                     with open(os.path.join(new_dataset_path,'val','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                         mask.tofile(file)
-                    with open(os.path.join(new_dataset_path,'val','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                    with open(os.path.join(new_dataset_path,'val','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                         image.tofile(file)
                     
                     val_idx +=1
             else:
 
             ##### TRAINING SPLIT #####
-                if train_idx< train_max_idx:
+                if train_idx<= train_max_idx:
                     if train_scene_names_saved.count(scene_main_name) <= max_n_train_images:
                         train_scene_names_saved.append(scene_main_name)
                         
                         with open(os.path.join(new_dataset_path,'train','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                             mask.tofile(file)
-                        with open(os.path.join(new_dataset_path,'train','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                        with open(os.path.join(new_dataset_path,'train','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                             image.tofile(file)
                         
                         train_idx +=1
@@ -291,19 +320,18 @@ def geo_split_notevents_creation(new_dataset_path: str,
             for image_name in extra_test_images:
                     with open(os.path.join(new_dataset_path,'test','masks',image_name.replace('_NIR_SWIR.pkl','_mask.bin')),'wb') as file:
                             mask.tofile(file)
-                    with open(os.path.join(new_dataset_path,'test','images',image_name.replace('.pkl','.bin')),'wb') as file:
+                    with open(os.path.join(new_dataset_path,'test','images',image_name.replace('_NIR_SWIR.pkl','.bin')),'wb') as file:
                         image.tofile(file)
                     test_idx += 1
 
-    # print('Not events generated')
+
     print(f'Not events generated: {train_idx} TRAINING, {val_idx} VAL, and {test_idx} TEST ')
 
-    # print(train_idx,val_idx,test_idx)
-    # print(train_max_idx,val_max_idx,test_max_idx)
 
 
 def generate_geo_split_dataset(new_dataset_path:str=None,
                                dataset_path : str = DATASET_PATH,
+                               band_combination:list = ["B12","B11","B8A"],
                                weakly : int = 0,
                                train_split_ratio : float = 0.8,
                                val_split_ratio : float = 0.1,
@@ -313,13 +341,14 @@ def generate_geo_split_dataset(new_dataset_path:str=None,
 
     if new_dataset_path:
         create_dataset_folders(new_dataset_path)
-
-    if not dataset_path:
-        dataset_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'dataset')
-
-    if not new_dataset_path:
+    else:
         new_dataset_path = os.path.join(os.path.dirname(dataset_path),'train_geo_split_dataset')
+        print(new_dataset_path)
         create_dataset_folders(new_dataset_path)
+
+    # if not dataset_path:
+    #     dataset_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'dataset')
+
 
     event_scenes_dict = get_n_events_per_scene_dict(dataset_path=dataset_path,seed=seed)
 
@@ -331,6 +360,7 @@ def generate_geo_split_dataset(new_dataset_path:str=None,
     
     geo_split_events_creation(dataset_path=dataset_path,
                               new_dataset_path = new_dataset_path,
+                              input_band_combination=band_combination,
                               event_scenes_dict = event_scenes_dict,
                               scenes_test_combination = scenes_test_combination,
                               weakly=bool(weakly),
@@ -339,6 +369,7 @@ def generate_geo_split_dataset(new_dataset_path:str=None,
 
     geo_split_notevents_creation(dataset_path = dataset_path,
                                  new_dataset_path=new_dataset_path,
+                                 input_band_combination=band_combination,
                                  scenes_test_combination = scenes_test_combination,
                                  train_split_ratio=train_split_ratio,
                                  val_split_ratio=val_split_ratio,
@@ -354,6 +385,7 @@ if __name__ == '__main__':
     parser.add_argument('--new_dataset_path',   type=str,   help='Path where the new dataset wants to be generated.',   default=None)
     parser.add_argument('--dataset_path',       type=str,   help='Path of the full dataset with all the patches',       default=DATASET_PATH)
     parser.add_argument('--weakly',             type=int,   help='Use weakly supervision. 1: YES. 0: NO ',              default=1,choices=[0,1])
+    parser.add_argument('--band_list',          type=str,   help='Specify the band combination for the dataset creation. Example: ["B12","B11","B8A"] ', nargs='+', default=["B12","B11","B8A"])
     parser.add_argument('--train_split_ratio',  type=float, help='Desired percentage for the training split.',          default=0.8)
     parser.add_argument('--val_split_ratio',    type=float, help='Desired percentage for the validation split.',        default=0.1)
     parser.add_argument('--test_split_ratio',   type=float, help='Desired percentage for the testing split.',           default=0.1)
@@ -364,15 +396,18 @@ if __name__ == '__main__':
     new_dataset_path = args.new_dataset_path
     dataset_path = args.dataset_path
     weakly = bool(args.weakly)
+    band_list = args.band_list
     train_split_ratio = args.train_split_ratio
     val_split_ratio = args.val_split_ratio
     test_split_ratio = args.test_split_ratio
     seed = args.seed
 
+    band_list_str = "_".join(band_list)
+
     if weakly:
-        dataset_name = 'train_geo_split_weakly_dataset'
+        dataset_name = f'train_geo_split_weakly_{band_list_str}_dataset'
     else:
-        dataset_name = 'train_geo_split_dataset'
+        dataset_name = f'train_geo_split_{band_list_str}_dataset'
 
     if new_dataset_path:
         create_dataset_folders(new_dataset_path)
@@ -391,6 +426,7 @@ if __name__ == '__main__':
     geo_split_events_creation(dataset_path=dataset_path,
                               new_dataset_path = new_dataset_path,
                               event_scenes_dict = event_scenes_dict,
+                              input_band_combination=band_list,
                               scenes_test_combination = scenes_test_combination,
                               weakly=weakly,
                               val_split_ratio= val_split_ratio,
@@ -399,6 +435,7 @@ if __name__ == '__main__':
     geo_split_notevents_creation(dataset_path = dataset_path,
                                  new_dataset_path=new_dataset_path,
                                  scenes_test_combination = scenes_test_combination,
+                                 input_band_combination=band_list,
                                  train_split_ratio=train_split_ratio,
                                  val_split_ratio=val_split_ratio,
                                  test_split_ratio=test_split_ratio,
