@@ -3,6 +3,9 @@
 This script generates the segmentation masks for the weakly segmentation training. 
 In this case, the events are saved as pixels with 255 values, whereas the potential_events are saved as pixels with 122 values
 
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
 """
 
 import os

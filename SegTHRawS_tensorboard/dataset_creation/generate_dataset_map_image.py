@@ -1,14 +1,19 @@
-import numpy as np
-from mpl_toolkits.basemap import Basemap
-import matplotlib.pyplot as plt
-import os
+"""
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
+"""
 
+import os
+import re
+import numpy as np
+import matplotlib.pyplot as plt
 import xml.etree.ElementTree as ET
+from mpl_toolkits.basemap import Basemap
+
 
 from constants import thraws_data_path,DATASET_PATH
-import re
-# pyraws_path = os.path.dirname(os.getcwd())
-# data_path = os.path.join(pyraws_path, "data", "raw")
+
 
 def create_dataset_map_image(projection: str = 'merc',
                              data_path: str = thraws_data_path,

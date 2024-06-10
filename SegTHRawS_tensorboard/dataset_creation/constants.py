@@ -1,14 +1,15 @@
+"""
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
+"""
 import os
 from threshold_conditions import Castro_Traba_conditions,Massimetti_conditions,Murphy_conditions,Schroeder_conditions,Kumar_Roy_conditions
 
 ######## DATASET PATHS CREATION ########
 
-
-
 SEGTHRAWS_DIRECTORY = os.path.dirname(os.path.dirname(__file__))
 MAIN_DIRECTORY = os.path.dirname(SEGTHRAWS_DIRECTORY)
-
-
 
 PATCH_SIZE = 256
 PATCH_STEP = 192 # This ensures an overlap of 25% in each direction

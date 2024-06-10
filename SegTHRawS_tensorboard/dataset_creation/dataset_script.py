@@ -1,3 +1,8 @@
+"""
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
+"""
 
 import os
 import argparse
@@ -61,7 +66,7 @@ if __name__ == '__main__':
     if not new_dataset_path:
         new_dataset_path = os.path.join(os.path.dirname(dataset_path),dataset_name)
 
-    # dataset_creation_multiprocess(data_path=thraws_data_path)
+    dataset_creation_multiprocess(data_path=thraws_data_path)
 
     if geo_split_condition:
         print(f"Generating geographical split dataset for bands {band_list_str}")

@@ -7,6 +7,9 @@ percentage of events pixels, percentage of potential events pixels, and percenta
 
 The last three rows are the mean, standard deviation and the total sum of each column.
 
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
 """
 
 import os

@@ -1,25 +1,28 @@
-import os
-import sys
-import matplotlib.pyplot as plt
+"""
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
+"""
+
 import gc
+import os
 import cv2
-from multiprocessing import Process
+import sys
+import pickle
+import argparse
 import numpy as np
+import matplotlib.pyplot as plt
+from multiprocessing import Process
 
 sys.path.insert(1, os.path.dirname(__file__)) ## Needed when called from scripts (Only needed when this is not a module) 
-
 sys.path.insert(1, os.path.dirname(os.path.dirname(__file__))) 
 
 #### NEED TO MODIFY THIS TO INCLUDE PyRawS in the main directory of the SEGTHRAWS folder
 sys.path.insert(1, '/home/cristopher/Documents/PyRawS/') # Include the PyRaws main folder
 
-import pickle
 from patchify import patchify
-
-from coregistration_superglue_multiband import SuperGlue_registration
-
-
 from utils import normalize_to_0_to_1
+from coregistration_superglue_multiband import SuperGlue_registration
 
 from constants import SEGTHRAWS_DIRECTORY, MAIN_DIRECTORY, DATASET_PATH,thraws_data_path
 from constants import paths_dict, masks_events_dirs, masks_potential_events_dirs
@@ -29,7 +32,6 @@ from constants import PATCH_SIZE, PATCH_STEP
 import warnings
 warnings.filterwarnings('ignore',category=RuntimeWarning)
 warnings.filterwarnings('ignore',category=UserWarning)
-
 
 from matplotlib import font_manager
 font_dirs = [os.path.join(SEGTHRAWS_DIRECTORY,'fonts','charter')]  # The path to the custom font file.
@@ -41,16 +43,6 @@ for font_file in font_files:
 import matplotlib as mpl
 mpl.rc('font',family='Charter')
 
-
-import argparse
-
-# pyraws_path = os.path.dirname(os.path.dirname(MAIN_DIRECTORY))
-
-# data_path = os.path.join(pyraws_path, "data", "raw")
-
-
-
-break_condition = False
 
 
 def plot_mask(ax, mask, title):

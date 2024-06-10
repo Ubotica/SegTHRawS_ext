@@ -1,3 +1,7 @@
+# DISCLAIMER
+
+**Repository shared externally with the supervisors of the project.**
+
 # SegTHRawS
 **PROVISIONAL** This repository corresponds to the Master thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com). The topic of the thesis is: onboard segmentation of thermal hotspots for raw Sentinel-2 multispectral imagery.
 

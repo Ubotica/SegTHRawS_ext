@@ -1,3 +1,8 @@
+"""
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
+"""
 
 import os
 import re

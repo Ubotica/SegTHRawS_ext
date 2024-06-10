@@ -1,10 +1,14 @@
+"""
+Copyright notice:
+@author Cristopher Castro Traba, Ubotica Technologies
+@copyright 2024 see license file for details
+"""
 
+import torch
 import numpy as np
-import sys
 
 from s2pix_detector import s2pix_detector
 
-import torch
 
 #####3 CHANGES: ADD THE B01 band to Schroeder and Kumar-Roy
 

@@ -1,3 +1,9 @@
+"""
+Copyright notice:
+@author Cristopher Castro Traba
+@copyright 2024 see license file for details
+"""
+
 import os
 import torch
 import random
