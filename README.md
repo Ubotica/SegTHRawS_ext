@@ -1,44 +1,52 @@
-# DISCLAIMER
 
-**Repository shared externally with the supervisors of the project.**
+
+![GitHub last commit](https://img.shields.io/github/last-commit/CristopherUbotica/SegTHRawS?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/CristopherUbotica/SegTHRawS?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/CristopherUbotica/SegTHRawS?style=flat-square)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 
 # SegTHRawS
-**PROVISIONAL** This repository corresponds to the Master thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com). The topic of the thesis is: onboard segmentation of thermal hotspots for raw Sentinel-2 multispectral imagery.
 
-The main directory is constituted by a **requirements.txt** file to install the required dependencies for the SegTHRawS environment, and two folders that contain the main code of the project: **SegTHRawS** and **segthraws_module**. They share the same code, but they differ on how the user access it. **SegTHRawS** provides python and shell scripts that can be executed through the terminal, while **segthraws_module** provides a python package to use all the scripts as functions.
-
-## Requirements
+**PROVISIONAL** This repository corresponds to the Master thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com). The thesis topic is onboard segmentation of thermal hotspots for raw Sentinel-2 multispectral imagery.
 
 
-## Structure of the code
-Inside **SegTHRawS** there are four folders that accounts for the dataset creation, the model training, the model conversion to myriad, and the tiling application. 
-### dataset_creation
-This folder contains all the available scripts for the dataset generation. If all the requirement specified in [Requirements](#markdown-header-Requirements) are met, the easiest way to generate the main and train datasets is by running **create_datasets.sh**. This shell script expects an argument of 0 or 1, for generating the training dataset with random or geographical split, respectively. If an argument is not passed, the default response of the script is to select the geographical split. 
 
-The next line of code shows how a geographical split can be generated from this shell script:
-```
-create_datasets.sh 1
-```
-**dataset_script.py** provides more control in the dataset generation process. If all the requirementes specified in [Requirements](#markdown-header-Requirements) are met, no input is needed, and the default values defined in **constants.py** are used.
+## Content of the repository
+The SegTHRawS repository includes the following directories:
 
-The expected input arguments: the path to the original dataset (THRawS in this case), if geographical split wants to be used for the training dataset, the path were the new datasets will be generated, whether weakly segmentation is used for the final segmentation masks, the different splits for the training dataset (train, validation, and testing), and the seed used for the random generators. 
+| Directory Name       | Description                                                                                                                                                                                     |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [segthraws](segthraws/)         | Contains PyRawS package with the following subdirectories:                                                                                                                           |
+|                      |   1. dataset_creation: Include the code to create the SegTHRawS and the geographical-split segmentation datasets using the majority voting approach and weakly labeling.                        |
+|                      |   2. model_training: Includes the code to train and test models with PyTorch Lightning.                                                                                                         |
+|                      |   3. fonts: Contains the Charter font used for the figures.                                                                                                                                     |
+| [PyRawS](pyraws/)               | Contains a reduced version of [PyRawS](https://github.com/ESA-PhiLab/PyRawS), needed for the dataset creation process.                                                               |
+| [resources](resources/)         | Contains various resources, such as images for the README.                                                                                                                           |
+| [scripts_and_studies](scripts/) | Contains scripts and code for creating a segmentation dataset from the THRawS dataset and for training segmentation models with PyTorch Lightning:                                   |
+|                      |   1. dataset_script.py: Python script for creating the SEgTHRawS dataset and the segmentation dataset frot training the models.                                                                 |
+|                      |   2. train_model_script.py: Python script to train and test segmentation models.                                                                                                                |
+|                      |   3. test_model_script.py: Python script to test previously trained segmentation models.                                                                                                        |
+|                      |   4. retrain_model_script.py: Python script to retrain previously trained segmentation models.                                                                                                  |
+|                      |   5. main_train_script.sh: Shell script to train and test segmentation models by executing train_model_script with different training  configurations.                                          |
+|                      |   6. test_model_script.sh: Shell script to test previously trained segmentation models by executing test_model_script with different training  configurations.                                  |
+|                      |   7. retrain_model_script.sh: Shell script to retrain segmentation models by executing retrain_model_script with different training  configurations.                                            |
+|                      |   8. get_model_size.py: Python script to obtain the model size in MB or Number of parameters.                                                                                                   |
 
-There is an optional argument that defines the path of the dataset that is going to be used to generate the training dataset. If this argument is defined, the training datasets will be generated based on this dataset.
 
-More information on these input arguments can be obtained using the help function in this python script. 
 
-The next line of code shows how to create the main and train dataset with geographical split:
-```
-python3 SegTHRawS/dataset_creation/dataset_script.py --data_path ../THRawS_data --geo_split 1 --new_dataset_path datasets --weakly 1 --train_split_ratio 0.8 --val_split_ratio 0.1 --test_split_ratio 0.1 -seed 42
-```
 
-### model_training
+## Installation
 
-**main_run_script.sh** is the shell script that performs automatic model training for different conditions, without any argument required. All the arguments are defined inside the script and it runs **main_run.py** in the backgorund for a different set of conditions. 
+Install SegTHRawS executing the Shell script  [build_env](build_env.sh).
 
-Inside the shell script, the user can specify which models to train, its loss function, if pre-trained weights are used for the encoder, the number of epochs, which seeds and batch sizes, and how many training runs will be performed for each set of conditions. More information on the input arguments can be found in the help function of **main_run.py**.
+The dataset and models path need to be modified accordingly inside [segthraws/main_paths.py](segthraws/main_paths.py). The dataset path must refer to where the THRawS dataset is located. 
 
-The expected output from this shell script is a folder called models where the different models trained are included. Each model has associated the pytorch model, the ONNX and UNN model, and its metrics. This script calls the function 'convert_ONNX_to_IR_UNN' inside the **myriad_conversion** folder in the parent directory.
 
-The list of available models, encoders, and loss functions for training can be found in **train_constants.py**. 
+## Contacts
+Created by Cristopher Castro Traba in collaboration with Delft University of Technology, Ubotica Technologies, and ESA $\Phi$-lab.
 
+* Cristopher Castro Traba - castrotraba@student.tudelft.nl cristopher.traba@ubotica.com
+* David Rijlaarsdam - david.rijlaarsdam@ubotica.com 
+* Gabriele Meoni - G.Meoni@tudelft.nl 
+* Roberto Del Prete - roberto.delprete@ext.esa.int and roberto.delprete@unina.it
+* Jian Guo - j.guo@tudelft.nl
