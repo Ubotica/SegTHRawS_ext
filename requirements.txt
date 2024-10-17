@@ -2,7 +2,7 @@ albumentations==1.4.3
 docker==7.0.0
 geopandas==0.14.3
 geopy==2.4.1
-lightning==2.2.2
+lightning==2.3.3
 matplotlib==3.8.4
 numpy==1.26.4
 onnx==1.16.0
