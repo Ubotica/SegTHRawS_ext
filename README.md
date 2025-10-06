@@ -9,9 +9,11 @@
 
 
 
-**SHARED EXTERNALLY** This repository corresponds to the Master thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com). The thesis topic is onboard segmentation of thermal hotspots for raw Sentinel-2 multispectral imagery. 
+**SHARED EXTERNALLY** This repository corresponds to the Master Thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com) for the Space Engineering Department at Delft University of Technology.
 
 The Sentinel-2 images are obtained from the [THRawS](https://zenodo.org/records/7908728) (Thermal Hotspots in raw Sentinel-2 data) dataset, which provides a global distribution of raw multispectral images to detect thermal events. Information on how to handle the dataset and process the images is available in its main repository: [PyRawS](https://github.com/ESA-PhiLab/PyRawS).
+
+The Segmentation of Thermal Hotspots in Raw Sentinel-2 data (SegTHRawS) dataset created in this project is available at: [Zenodo](https://zenodo.org/records/14741990).
 
 
 
