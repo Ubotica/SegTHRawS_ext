@@ -1,6 +1,9 @@
 """
 Copyright notice:
-Source code obtained for the Massimetti conditions was obtained from Gabriele Meoni and Roberto del Prete in THRawS (https://arxiv.org/abs/2305.11891), available at: https://github.com/ESA-PhiLab/PyRawS
+Source code obtained for the Massimetti conditions was obtained from
+ Gabriele Meoni and Roberto del Prete in THRawS (https://arxiv.org/abs/2305.11891),
+ available at: https://github.com/ESA-PhiLab/PyRawS
+
 @author Cristopher Castro Traba, Ubotica Technologies
 @copyright 2024 see license file for details
 """
@@ -23,10 +26,14 @@ def get_thresholds(
 
     Args:
         sentinel_img (torch.tensor): sentinel image
-        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
-        S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
-        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1,1,0.5].
+        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map.
+         Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for calculation of beta threshold map.
+         Defaults to [2, 0.5, 0.5].
+        S_thr (list, optional): pixel-level value for calculation of S threshold map.
+         Defaults to [1.2, 1, 1.5, 1].
+        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map.
+         Defaults to [1,1,0.5].
 
     Returns:
         torch.tensor: alpha threshold map.
@@ -109,6 +116,7 @@ def get_thresholds(
         )
     return alpha, beta, S, gamma
 
+
 def get_alert_matrix_and_thresholds(
     sentinel_img,
     alpha_thr=[1.4, 1.2, 0.15],
@@ -120,10 +128,14 @@ def get_alert_matrix_and_thresholds(
 
     Args:
         sentinel_img (torch.tensor): sentinel image
-        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
-        S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
-        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1,1,0.5].
+        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map.
+         Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for calculation of beta threshold map.
+         Defaults to [2, 0.5, 0.5].
+        S_thr (list, optional): pixel-level value for calculation of S threshold map.
+         Defaults to [1.2, 1, 1.5, 1].
+        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map.
+         Defaults to [1,1,0.5].
 
     Returns:
         torch.tensor: alert_matrix threshold map.
@@ -141,8 +153,10 @@ def get_alert_matrix_and_thresholds(
         )
     return alert_matrix, alpha, beta, S, gamma
 
+
 def cluster_9px(img):
-    """It performs the convolution to detect clusters of 9 activate pixels (current pixel and 8 surrounding pixels) are at 1.
+    """It performs the convolution to detect clusters of 9 activate pixels
+     (current pixel and 8 surrounding pixels) are at 1.
 
     Args:
         img (torch.tensor): input alert-matrix
@@ -172,6 +186,7 @@ def cluster_9px(img):
         torch.cuda.empty_cache()
     return surrounded
 
+
 def s2pix_detector(
     sentinel_img,
     alpha_thr=[1.4, 1.2, 0.15],
@@ -183,10 +198,14 @@ def s2pix_detector(
 
     Args:
         sentinel_img (torch.tensor): sentinel image
-        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map. Defaults to [1.4, 1.2, 0.15].
-        beta_thr (list, optional): pixel-level value for calculation of beta threshold map. Defaults to [2, 0.5, 0.5].
-        S_thr (list, optional): pixel-level value for calculation of S threshold map. Defaults to [1.2, 1, 1.5, 1].
-        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map. Defaults to [1,1,0.5].
+        alpha_thr (list, optional): pixel-level value for calculation of alpha threshold map.
+         Defaults to [1.4, 1.2, 0.15].
+        beta_thr (list, optional): pixel-level value for calculation of beta threshold map.
+         Defaults to [2, 0.5, 0.5].
+        S_thr (list, optional): pixel-level value for calculation of S threshold map.
+         Defaults to [1.2, 1, 1.5, 1].
+        gamma_thr (list, optional): pixel-level value for calculation of gamma threshold map.
+         Defaults to [1,1,0.5].
 
     Returns:
         torch.tensor: binary classification. It is if at least a cluster of 9 hot pixels is found.
@@ -209,11 +228,12 @@ def s2pix_detector(
             alert_matrix,
         )
 
+
 def filter_bbox_list(
     alert_matrix, props, event_bbox_coordinates_list=None, num_pixels_threshold=9
 ):
-    """Filters bounding box lists found in an alert matrix by takking only the bounding boxes having at least
-      ""num_pixels_threshold"" active pixels.
+    """Filters bounding box lists found in an alert matrix by takking only the bounding boxes
+     having at least ""num_pixels_threshold"" active pixels.
 
     Args:
         alert_matrix (torch.tensor): alert matrix
@@ -260,28 +280,29 @@ def filter_bbox_list(
     return bbox_filtered_list, event_bbox_coordinates_filtered_list
 
 
-def Castro_Traba_conditions(input_image: np.ndarray,
-                            empty_pixels_pattern: np.ndarray,
-                            neighborhood_size: int = 30,
-                            ) -> np.ndarray:
-    """ Castro Traba conditions algorithm
-    
+def Castro_Traba_conditions(
+    input_image: np.ndarray,
+    empty_pixels_pattern: np.ndarray,
+    neighborhood_size: int = 30,
+) -> np.ndarray:
+    """Castro Traba conditions algorithm
+
     Attributes
     ----------
 
     input_image : np.ndarray,
         Input image to apply the conditions for thermal hotspots segmentation
-    
+
     empty_pixel_pattern : np.ndarray,
         Pattern that specify the common area of the multi-band images
-    
+
     neighborhood_size : int,
         Size of the neighborhood used in the contextual step, Default = 30
 
     Outputs
     -------
     mask_broadcasted : np.ndarray
-        Output three-band segmentation mask  
+        Output three-band segmentation mask
 
     Notes
     -----
@@ -289,52 +310,68 @@ def Castro_Traba_conditions(input_image: np.ndarray,
     """
     # The expected band order of the input image is: B12,B11,B8A
 
-    new_image = input_image*empty_pixels_pattern[:,:,np.newaxis]
-    new_image = new_image[:,:,::-1]
+    new_image = input_image * empty_pixels_pattern[:, :, np.newaxis]
+    new_image = new_image[:, :, ::-1]
 
-    #Murphy conditions (Massimetti uses mask2 >= 1.2)
-    mask1 =  np.divide(new_image[:,:,2],new_image[:,:,1],out = np.zeros_like(new_image[:,:,0]),where=empty_pixels_pattern==True) >= 1.4
-    mask2 =  np.divide(new_image[:,:,2],new_image[:,:,0],out = np.zeros_like(new_image[:,:,0]),where=empty_pixels_pattern==True) >= 1.4
-    mask3 =  new_image[:,:,2] >= 0.15#*255
+    # Murphy conditions (Massimetti uses mask2 >= 1.2)
+    mask1 = (
+        np.divide(
+            new_image[:, :, 2],
+            new_image[:, :, 1],
+            out=np.zeros_like(new_image[:, :, 0]),
+            where=empty_pixels_pattern == True,
+        )
+        >= 1.4
+    )
+    mask2 = (
+        np.divide(
+            new_image[:, :, 2],
+            new_image[:, :, 0],
+            out=np.zeros_like(new_image[:, :, 0]),
+            where=empty_pixels_pattern == True,
+        )
+        >= 1.4
+    )
+    mask3 = new_image[:, :, 2] >= 0.15  # *255
 
-
-
-    # mask4 =  new_image[:,:,1]/new_image[:,:,0] >=2
-    mask4 =  np.logical_and(new_image[:,:,2] >100/255,new_image[:,:,0] < 50/255)
+    mask4 = np.logical_and(
+        new_image[:, :, 2] > 100 / 255, new_image[:, :, 0] < 50 / 255
+    )
 
     # Condition for surrounding clouds with high values of SWIR bands
-    mask5 = np.logical_and(np.logical_or(new_image[:,:,2]>=150/255,new_image[:,:,1]>=150/255),new_image[:,:,0]<60/255)
-    # mask5 = np.logical_or(new_image[:,:,2]>=150,new_image[:,:,1]>=150)
+    mask5 = np.logical_and(
+        np.logical_or(new_image[:, :, 2] >= 150 / 255, new_image[:, :, 1] >= 150 / 255),
+        new_image[:, :, 0] < 60 / 255,
+    )
 
     ## Hottest pixel conditions (almost white)
-    # mask6 = np.logical_and(np.logical_and(new_image[:,:,2]>=180,new_image[:,:,1]>=180),new_image[:,:,0]>125)
-    mask6 = np.logical_and(new_image[:,:,2]>=180/255,new_image[:,:,1]>=180/255)
-    
-    #These 3 conditions can be in 1 line
-    mask_combined = np.logical_and(mask1,np.logical_and(mask2,np.logical_and(mask3,mask4)))
-    
-    mask_combined = np.logical_or(mask_combined,mask5)
 
-    mask_combined = np.logical_or(mask_combined,mask6)
+    mask6 = np.logical_and(
+        new_image[:, :, 2] >= 180 / 255, new_image[:, :, 1] >= 180 / 255
+    )
+
+    # These 3 conditions can be in 1 line
+    mask_combined = np.logical_and(
+        mask1, np.logical_and(mask2, np.logical_and(mask3, mask4))
+    )
+
+    mask_combined = np.logical_or(mask_combined, mask5)
+
+    mask_combined = np.logical_or(mask_combined, mask6)
 
     mask_combined_temp = mask_combined.copy()
 
-
     for i in range(mask_combined.shape[0]):
-            for j in range(mask_combined.shape[1]):
-                if mask_combined[i, j]:
+        for j in range(mask_combined.shape[1]):
+            if mask_combined[i, j]:
 
-                    neighbor_window = mask_combined[
-                        max(0, i - neighborhood_size // 2) : i
-                        + neighborhood_size // 2
-                        + 1,
-                        max(0, j - neighborhood_size // 2) : j
-                        + neighborhood_size // 2
-                        + 1,
-                    ]
+                neighbor_window = mask_combined[
+                    max(0, i - neighborhood_size // 2) : i + neighborhood_size // 2 + 1,
+                    max(0, j - neighborhood_size // 2) : j + neighborhood_size // 2 + 1,
+                ]
 
-                    condition_1 = (
-                        np.divide(
+                condition_1 = (
+                    np.divide(
                         new_image[
                             max(0, i - neighborhood_size // 2) : i
                             + neighborhood_size // 2
@@ -342,31 +379,8 @@ def Castro_Traba_conditions(input_image: np.ndarray,
                             max(0, j - neighborhood_size // 2) : j
                             + neighborhood_size // 2
                             + 1,
-                            2
-                        ]
-                        , new_image[
-                            max(0, i - neighborhood_size // 2) : i
-                            + neighborhood_size // 2
-                            + 1,
-                            max(0, j - neighborhood_size // 2) : j
-                            + neighborhood_size // 2
-                            + 1,
-                            1
+                            2,
                         ],
-                        out = np.zeros_like(neighbor_window.astype(np.float32)),
-                        where = new_image[
-                            max(0, i - neighborhood_size // 2) : i
-                            + neighborhood_size // 2
-                            + 1,
-                            max(0, j - neighborhood_size // 2) : j
-                            + neighborhood_size // 2
-                            + 1,
-                            1
-                        ]!=False)
-                        >= 4
-                    )
-
-                    condition_2 = (
                         new_image[
                             max(0, i - neighborhood_size // 2) : i
                             + neighborhood_size // 2
@@ -374,81 +388,123 @@ def Castro_Traba_conditions(input_image: np.ndarray,
                             max(0, j - neighborhood_size // 2) : j
                             + neighborhood_size // 2
                             + 1,
-                            0
+                            1,
+                        ],
+                        out=np.zeros_like(neighbor_window.astype(np.float32)),
+                        where=new_image[
+                            max(0, i - neighborhood_size // 2) : i
+                            + neighborhood_size // 2
+                            + 1,
+                            max(0, j - neighborhood_size // 2) : j
+                            + neighborhood_size // 2
+                            + 1,
+                            1,
                         ]
-                        < 0.1
+                        != False,
                     )
-                    
-                    mask_combined_temp[
+                    >= 4
+                )
+
+                condition_2 = (
+                    new_image[
                         max(0, i - neighborhood_size // 2) : i
                         + neighborhood_size // 2
                         + 1,
                         max(0, j - neighborhood_size // 2) : j
                         + neighborhood_size // 2
                         + 1,
-                    ] = np.logical_or(
-                        neighbor_window,  np.logical_and(condition_1, condition_2)
-                        # neighbor_window,  condition_1
-                    )
+                        0,
+                    ]
+                    < 0.1
+                )
+
+                mask_combined_temp[
+                    max(0, i - neighborhood_size // 2) : i + neighborhood_size // 2 + 1,
+                    max(0, j - neighborhood_size // 2) : j + neighborhood_size // 2 + 1,
+                ] = np.logical_or(
+                    neighbor_window,
+                    np.logical_and(condition_1, condition_2),
+                    # neighbor_window,  condition_1
+                )
 
     mask_combined = mask_combined_temp
 
     # Condition for the inner pixels that were not detected before
     for i in range(mask_combined.shape[0]):
         for j in range(mask_combined.shape[1]):
-            if np.sum(mask_combined[
-                max(0, i - 1) : i + 2,
-                max(0, j - 1) : j + 2,
-            ]) >= 7:
-                mask_combined[i,j]=True
+            if (
+                np.sum(
+                    mask_combined[
+                        max(0, i - 1) : i + 2,
+                        max(0, j - 1) : j + 2,
+                    ]
+                )
+                >= 7
+            ):
+                mask_combined[i, j] = True
 
-    # mask_broadcasted = np.stack([mask_combined] * 3, axis=-1).astype(np.uint8)*255
     mask_broadcasted = mask_combined.astype(np.float32)
 
     return mask_broadcasted
 
-def Murphy_conditions(input_image: np.ndarray,
-                      empty_pixels_pattern: np.ndarray,
-                      neighborhood_size: int = 8,
-                      ) -> np.ndarray:
-    """ Murphy conditions algorithm
-    
+
+def Murphy_conditions(
+    input_image: np.ndarray,
+    empty_pixels_pattern: np.ndarray,
+    neighborhood_size: int = 8,
+) -> np.ndarray:
+    """Murphy conditions algorithm
+
     Attributes
     ----------
 
     input_image : np.ndarray,
         Input image to apply the conditions for thermal hotspots segmentation
-    
+
     empty_pixel_pattern : np.ndarray,
         Pattern that specify the common area of the multi-band images
-    
+
     neighborhood_size : int,
         Size of the neighborhood used in the contextual step, Default = 8
 
     Outputs
     -------
     mask_broadcasted : np.ndarray
-        Output three-band segmentation mask  
+        Output three-band segmentation mask
 
     Notes
     -----
 
     """
     # The expected band order of the input image is: B12,B11,B8A
-    
 
     ### Murphy conditions initial fire pixels
 
-    new_image = input_image*empty_pixels_pattern[:,:,np.newaxis]
-    new_image = new_image[:,:,::-1]
+    new_image = input_image * empty_pixels_pattern[:, :, np.newaxis]
+    new_image = new_image[:, :, ::-1]
 
-    #Murphy conditions (Massimetti uses mask2 >= 1.2)
-    mask1 =  np.divide(new_image[:,:,2],new_image[:,:,1],out = np.zeros_like(new_image[:,:,0]),where=empty_pixels_pattern==True) >= 1.4
-    mask2 =  np.divide(new_image[:,:,2],new_image[:,:,0],out = np.zeros_like(new_image[:,:,0]),where=empty_pixels_pattern==True) >= 1.4
-    mask3 =  new_image[:,:,2] >= 0.15#*255
+    # Murphy conditions (Massimetti uses mask2 >= 1.2)
+    mask1 = (
+        np.divide(
+            new_image[:, :, 2],
+            new_image[:, :, 1],
+            out=np.zeros_like(new_image[:, :, 0]),
+            where=empty_pixels_pattern == True,
+        )
+        >= 1.4
+    )
+    mask2 = (
+        np.divide(
+            new_image[:, :, 2],
+            new_image[:, :, 0],
+            out=np.zeros_like(new_image[:, :, 0]),
+            where=empty_pixels_pattern == True,
+        )
+        >= 1.4
+    )
+    mask3 = new_image[:, :, 2] >= 0.15  # *255
 
     mask_combined = np.logical_and(mask1, np.logical_and(mask2, mask3))
-
 
     ### Murphy conditions potential fire pixels
 
@@ -459,44 +515,42 @@ def Murphy_conditions(input_image: np.ndarray,
             if mask_combined[i, j]:
 
                 neighbor_window = mask_combined[
-                    max(0, i - neighborhood_size // 2) : i
-                    + neighborhood_size // 2
-                    + 1,
-                    max(0, j - neighborhood_size // 2) : j
-                    + neighborhood_size // 2
-                    + 1,
+                    max(0, i - neighborhood_size // 2) : i + neighborhood_size // 2 + 1,
+                    max(0, j - neighborhood_size // 2) : j + neighborhood_size // 2 + 1,
                 ]
 
                 condition_1 = (
                     np.divide(
-                    new_image[
-                        max(0, i - neighborhood_size // 2) : i
-                        + neighborhood_size // 2
-                        + 1,
-                        max(0, j - neighborhood_size // 2) : j
-                        + neighborhood_size // 2
-                        + 1,
-                        1
-                    ]
-                    , new_image[
-                        max(0, i - neighborhood_size // 2) : i
-                        + neighborhood_size // 2
-                        + 1,
-                        max(0, j - neighborhood_size // 2) : j
-                        + neighborhood_size // 2
-                        + 1,
-                        0
-                    ],
-                    out = np.zeros_like(neighbor_window.astype(np.float32)),
-                    where = new_image[
-                        max(0, i - neighborhood_size // 2) : i
-                        + neighborhood_size // 2
-                        + 1,
-                        max(0, j - neighborhood_size // 2) : j
-                        + neighborhood_size // 2
-                        + 1,
-                        0
-                    ]!=0)
+                        new_image[
+                            max(0, i - neighborhood_size // 2) : i
+                            + neighborhood_size // 2
+                            + 1,
+                            max(0, j - neighborhood_size // 2) : j
+                            + neighborhood_size // 2
+                            + 1,
+                            1,
+                        ],
+                        new_image[
+                            max(0, i - neighborhood_size // 2) : i
+                            + neighborhood_size // 2
+                            + 1,
+                            max(0, j - neighborhood_size // 2) : j
+                            + neighborhood_size // 2
+                            + 1,
+                            0,
+                        ],
+                        out=np.zeros_like(neighbor_window.astype(np.float32)),
+                        where=new_image[
+                            max(0, i - neighborhood_size // 2) : i
+                            + neighborhood_size // 2
+                            + 1,
+                            max(0, j - neighborhood_size // 2) : j
+                            + neighborhood_size // 2
+                            + 1,
+                            0,
+                        ]
+                        != 0,
+                    )
                     >= 2
                 )
 
@@ -508,47 +562,44 @@ def Murphy_conditions(input_image: np.ndarray,
                         max(0, j - neighborhood_size // 2) : j
                         + neighborhood_size // 2
                         + 1,
-                        1
+                        1,
                     ]
                     > 0.5
                 )
-                
+
                 mask_combined_temp[
-                    max(0, i - neighborhood_size // 2) : i
-                    + neighborhood_size // 2
-                    + 1,
-                    max(0, j - neighborhood_size // 2) : j
-                    + neighborhood_size // 2
-                    + 1,
+                    max(0, i - neighborhood_size // 2) : i + neighborhood_size // 2 + 1,
+                    max(0, j - neighborhood_size // 2) : j + neighborhood_size // 2 + 1,
                 ] = np.logical_or(
-                    neighbor_window,  np.logical_and(condition_1, condition_2)
+                    neighbor_window, np.logical_and(condition_1, condition_2)
                 )
 
     mask_combined = mask_combined_temp
 
-    # mask_broadcasted = np.stack([mask_combined] * 3, axis=-1).astype(np.uint8)*255
     mask_broadcasted = mask_combined.astype(np.float32)
 
     return mask_broadcasted
 
-def Massimetti_conditions(input_image: np.ndarray,
-                          empty_pixels_pattern: np.ndarray,
-                          ) ->np.ndarray:
-    """ Massimetti conditions algorithm from PyRawS 
-    
+
+def Massimetti_conditions(
+    input_image: np.ndarray,
+    empty_pixels_pattern: np.ndarray,
+) -> np.ndarray:
+    """Massimetti conditions algorithm from PyRawS
+
     Attributes
     ----------
 
     input_image : np.ndarray,
         Input image to apply the conditions for thermal hotspots segmentation
-    
+
     empty_pixel_pattern : np.ndarray,
         Pattern that specify the common area of the multi-band images
 
     Outputs
     -------
     mask_broadcasted : np.ndarray
-        Output three-band segmentation mask  
+        Output three-band segmentation mask
 
     Notes
     -----
@@ -556,8 +607,10 @@ def Massimetti_conditions(input_image: np.ndarray,
     """
     # The expected band order of the input image is: B12,B11,B8A
 
-    new_image = input_image*empty_pixels_pattern[:,:,np.newaxis]
-    input_image_copy = new_image[:,:,::-1].copy() #Needed because s2pix detector expects the 8A band first
+    new_image = input_image * empty_pixels_pattern[:, :, np.newaxis]
+    input_image_copy = new_image[
+        :, :, ::-1
+    ].copy()  # Needed because s2pix detector expects the 8A band first
     _, raw_filtered_alert_matrix, _ = s2pix_detector(torch.Tensor(input_image_copy))
 
     # mask_broadcasted = np.stack([raw_filtered_alert_matrix.bool()] * 3, axis=-1).astype(np.uint8)*255
@@ -565,24 +618,26 @@ def Massimetti_conditions(input_image: np.ndarray,
 
     return mask_broadcasted
 
-def Kumar_Roy_conditions(input_image: np.ndarray,
-                         empty_pixels_pattern: np.ndarray,
-                         )->np.ndarray:
-    """ Kumar-Roy conditions algorithm
-    
+
+def Kumar_Roy_conditions(
+    input_image: np.ndarray,
+    empty_pixels_pattern: np.ndarray,
+) -> np.ndarray:
+    """Kumar-Roy conditions algorithm
+
     Attributes
     ----------
 
     input_image : np.ndarray,
         Input image to apply the conditions for thermal hotspots segmentation
-    
+
     empty_pixel_pattern : np.ndarray,
         Pattern that specify the common area of the multi-band images
 
     Outputs
     -------
     mask_broadcasted : np.ndarray
-        Output three-band segmentation mask  
+        Output three-band segmentation mask
 
     Notes
     -----
@@ -590,17 +645,15 @@ def Kumar_Roy_conditions(input_image: np.ndarray,
     """
     ### The expected bands are: B12, B11, B8A, B04, B03, B02, and B01
 
-    input_image = input_image*empty_pixels_pattern[:,:,np.newaxis]
-
+    input_image = input_image * empty_pixels_pattern[:, :, np.newaxis]
 
     if input_image.shape[2] == 7:
-        input_image = input_image[:,:,:-1] #This eliminates the B01 band
-    neighborhood_sizes = [x for x in range(5,61+1,2)]
+        input_image = input_image[:, :, :-1]  # This eliminates the B01 band
+    neighborhood_sizes = [x for x in range(5, 61 + 1, 2)]
 
     ### Unambiguous active fires conditions
 
     mask1 = input_image[:, :, 3] <= 0.53 * input_image[:, :, 0] - 0.214
-
 
     mask1_temp = mask1.copy()
 
@@ -627,7 +680,8 @@ def Kumar_Roy_conditions(input_image: np.ndarray,
                     - 0.044
                 )
 
-                #Iterative process to all the detected pixels. The iteration does not account for pixels in smallers i or j, as it would be too computationally expensive 
+                # Iterative process to all the detected pixels. The iteration does not account
+                # for pixels in smallers i or j, as it would be too computationally expensive
                 mask1_temp[
                     max(0, i - 1) : i + 1 + 1,
                     max(0, j - 1) : j + 1 + 1,
@@ -653,10 +707,12 @@ def Kumar_Roy_conditions(input_image: np.ndarray,
 
                     neighbor_indexes = (
                         slice(
-                            max(0, i - neighborhood_size // 2), i + neighborhood_size // 2 + 1
+                            max(0, i - neighborhood_size // 2),
+                            i + neighborhood_size // 2 + 1,
                         ),
                         slice(
-                            max(0, j - neighborhood_size // 2), j + neighborhood_size // 2 + 1
+                            max(0, j - neighborhood_size // 2),
+                            j + neighborhood_size // 2 + 1,
                         ),
                     )
 
@@ -665,8 +721,9 @@ def Kumar_Roy_conditions(input_image: np.ndarray,
                     negated_mask = ~np.logical_and(
                         mask2[neighbor_indexes], mask1[neighbor_indexes]
                     )
-                    
-                    # This represents the image without the unambiguous active fire and potential fires pixels. Next step discard, water pixels
+
+                    # This represents the image without the unambiguous active fire and
+                    # potential fires pixels. Next step discard, water pixels
                     mask_window = neighbor_window * negated_mask[:, :, np.newaxis]
 
                     # Water pixel conditions
@@ -680,82 +737,124 @@ def Kumar_Roy_conditions(input_image: np.ndarray,
 
                     condition_water_negated = ~condition_water_pixels
 
-                    if np.sum(condition_water_pixels)/condition_water_pixels.size < 0.25:
-                        mask_combined_temp[i,j] = False # If never finds 25% of pixels, it is not considered a fire
+                    if (
+                        np.sum(condition_water_pixels) / condition_water_pixels.size
+                        < 0.25
+                    ):
+                        mask_combined_temp[i, j] = (
+                            False  # If never finds 25% of pixels, it is not considered a fire
+                        )
                     else:
                         ### This represents the elements that are not fires or water pixels
-                        mask_window = mask_window * condition_water_negated[:, :, np.newaxis]
-
-                        condition_1 = np.divide(input_image[i, j, 0] , input_image[i, j, 2],out=np.array((0),dtype=np.float32),where=input_image[i,j,2]!=0) > np.mean(
-                            np.divide(mask_window[:,:,0],mask_window[:,:,2],out=np.zeros_like(mask_window[:,:,0]),where=mask_window[:,:,2]!=0)
-                            + max(0.8, 3 * np.std(np.divide(mask_window[:,:,0],mask_window[:,:,2],out=np.zeros_like(mask_window[:,:,0]),where=mask_window[:,:,2]!=0)))
+                        mask_window = (
+                            mask_window * condition_water_negated[:, :, np.newaxis]
                         )
 
-                        condition_2 = np.divide(input_image[i, j, 0],input_image[i, j, 2],out=np.zeros_like(input_image[i,j,0]),where=input_image[i,j,2]!=0) > np.mean(
-                            mask_window[:,:,0]
+                        condition_1 = np.divide(
+                            input_image[i, j, 0],
+                            input_image[i, j, 2],
+                            out=np.array((0), dtype=np.float32),
+                            where=input_image[i, j, 2] != 0,
+                        ) > np.mean(
+                            np.divide(
+                                mask_window[:, :, 0],
+                                mask_window[:, :, 2],
+                                out=np.zeros_like(mask_window[:, :, 0]),
+                                where=mask_window[:, :, 2] != 0,
+                            )
                             + max(
-                                0.08,
+                                0.8,
                                 3
-                                * np.std(mask_window[:,:,0]),
+                                * np.std(
+                                    np.divide(
+                                        mask_window[:, :, 0],
+                                        mask_window[:, :, 2],
+                                        out=np.zeros_like(mask_window[:, :, 0]),
+                                        where=mask_window[:, :, 2] != 0,
+                                    )
+                                ),
                             )
                         )
-                        real_potential_fire_condition = np.logical_and(condition_1,condition_2)
+
+                        condition_2 = np.divide(
+                            input_image[i, j, 0],
+                            input_image[i, j, 2],
+                            out=np.zeros_like(input_image[i, j, 0]),
+                            where=input_image[i, j, 2] != 0,
+                        ) > np.mean(
+                            mask_window[:, :, 0]
+                            + max(
+                                0.08,
+                                3 * np.std(mask_window[:, :, 0]),
+                            )
+                        )
+                        real_potential_fire_condition = np.logical_and(
+                            condition_1, condition_2
+                        )
 
                         if real_potential_fire_condition:
-                            mask_combined_temp[i,j] = True
+                            mask_combined_temp[i, j] = True
                         else:
-                            mask_combined_temp[i,j] = False
+                            mask_combined_temp[i, j] = False
                         break
 
     mask2 = mask_combined_temp
 
     mask_combined = np.logical_or(mask1, mask2)
 
-    # mask_broadcasted = np.stack([mask_combined] * 3, axis=-1).astype(np.uint8)*255
     mask_broadcasted = mask_combined.astype(np.float32)
 
     return mask_broadcasted
 
-def Schroeder_conditions(input_image : np.ndarray,
-                         empty_pixels_pattern: np.ndarray,
-                         neighborhood_size: int = 61,
-                         ) -> np.ndarray:
-    """ Schroeder conditions algorithm
-    
+
+def Schroeder_conditions(
+    input_image: np.ndarray,
+    empty_pixels_pattern: np.ndarray,
+    neighborhood_size: int = 61,
+) -> np.ndarray:
+    """Schroeder conditions algorithm
+
     Attributes
     ----------
 
     input_image : np.ndarray,
         Input image to apply the conditions for thermal hotspots segmentation
-    
+
     empty_pixel_pattern : np.ndarray,
         Pattern that specify the common area of the multi-band images
-    
+
     neighborhood_size : int,
         Size of the neighborhood used in the contextual step, Default = 61
 
     Outputs
     -------
     mask_broadcasted : np.ndarray
-        Output three-band segmentation mask  
+        Output three-band segmentation mask
 
     Notes
     -----
 
     """
     ### The expected bands are: B12, B11, B8A, B04, B03, B02, and B01
-    input_image = input_image*empty_pixels_pattern[:,:,np.newaxis]
+    input_image = input_image * empty_pixels_pattern[:, :, np.newaxis]
 
-    #Unambiguous active fire pixels
+    # Unambiguous active fire pixels
 
-    mask1 = np.divide(input_image[:, :, 0], input_image[:, :, 2],out=np.zeros_like(input_image[:,:,2]),where=input_image[:,:,2]!=0) > 2.5
-    mask2 = input_image[:, :, 0] - input_image[:, :, 2] > 0.3  # *255
-    mask3 = input_image[:, :, 0] > 0.5  # *255
+    mask1 = (
+        np.divide(
+            input_image[:, :, 0],
+            input_image[:, :, 2],
+            out=np.zeros_like(input_image[:, :, 2]),
+            where=input_image[:, :, 2] != 0,
+        )
+        > 2.5
+    )
+    mask2 = input_image[:, :, 0] - input_image[:, :, 2] > 0.3
+    mask3 = input_image[:, :, 0] > 0.5
 
     mask4 = input_image[:, :, 1] > 0.8
-    # mask2 = input_image[:,:,2] > 0.5*255
-    mask5 = input_image[:, :, 6] < 0.2  # *255
-    mask6 = np.logical_or(input_image[:, :, 2] > 0.4, input_image[:, :, 0] < 0.1)  # *255
+    mask5 = input_image[:, :, 6] < 0.2
+    mask6 = np.logical_or(input_image[:, :, 2] > 0.4, input_image[:, :, 0] < 0.1)
 
     mask_combined_1 = np.logical_and(mask1, np.logical_and(mask2, mask3))
     mask_combined_2 = np.logical_and(mask4, np.logical_and(mask5, mask6))
@@ -763,7 +862,13 @@ def Schroeder_conditions(input_image : np.ndarray,
 
     # Potential active fires
     mask7 = np.logical_and(
-        np.divide(input_image[:, :, 0],input_image[:, :, 2],out=np.zeros_like(input_image[:,:,2]),where=input_image[:,:,2]!=0) > 1.8,
+        np.divide(
+            input_image[:, :, 0],
+            input_image[:, :, 2],
+            out=np.zeros_like(input_image[:, :, 2]),
+            where=input_image[:, :, 2] != 0,
+        )
+        > 1.8,
         input_image[:, :, 0] - input_image[:, :, 2] > 0.17,
     )
 
@@ -775,10 +880,12 @@ def Schroeder_conditions(input_image : np.ndarray,
 
                 neighbor_indexes = (
                     slice(
-                        max(0, i - neighborhood_size // 2), i + neighborhood_size // 2 + 1
+                        max(0, i - neighborhood_size // 2),
+                        i + neighborhood_size // 2 + 1,
                     ),
                     slice(
-                        max(0, j - neighborhood_size // 2), j + neighborhood_size // 2 + 1
+                        max(0, j - neighborhood_size // 2),
+                        j + neighborhood_size // 2 + 1,
                     ),
                 )
 
@@ -788,13 +895,18 @@ def Schroeder_conditions(input_image : np.ndarray,
                     mask7[neighbor_indexes], mask_combined[neighbor_indexes]
                 )
 
-                #Image without the unambiguous active fire and potential fires pixels.
+                # Image without the unambiguous active fire and potential fires pixels.
                 mask_window = neighbor_window * negated_mask[:, :, np.newaxis]
 
                 # Water pixel conditions
 
                 condition_water_1 = np.logical_and(
-                    np.divide(neighbor_window[:, :, 3] ,neighbor_window[:, :, 2],out=np.zeros_like(mask_window[:,:,2]),where=neighbor_window[:,:,2]!=0),
+                    np.divide(
+                        neighbor_window[:, :, 3],
+                        neighbor_window[:, :, 2],
+                        out=np.zeros_like(mask_window[:, :, 2]),
+                        where=neighbor_window[:, :, 2] != 0,
+                    ),
                     np.logical_and(
                         neighbor_window[:, :, 2] > neighbor_window[:, :, 1],
                         neighbor_window[:, :, 6] - neighbor_window[:, :, 0] > 0.2,
@@ -817,12 +929,38 @@ def Schroeder_conditions(input_image : np.ndarray,
                 ### Pixels that are not fires or water pixels
                 mask_window = mask_window * condition_water_negated[:, :, np.newaxis]
 
-                condition_1 = np.divide(input_image[i, j, 0] , input_image[i, j, 2],out=np.array((0),dtype=np.float32),where=input_image[i,j,2]!=0) > np.mean(
-                    np.divide(mask_window[:, :, 0] , mask_window[:, :, 2],out=np.zeros_like(mask_window[:,:,2]),where=mask_window[:,:,2]!=0)
-                    + max(0.8, 3 * np.std(np.divide(mask_window[:, :, 0] , mask_window[:, :, 2],out=np.zeros_like(mask_window[:,:,2]),where=mask_window[:,:,2]!=0)))
+                condition_1 = np.divide(
+                    input_image[i, j, 0],
+                    input_image[i, j, 2],
+                    out=np.array((0), dtype=np.float32),
+                    where=input_image[i, j, 2] != 0,
+                ) > np.mean(
+                    np.divide(
+                        mask_window[:, :, 0],
+                        mask_window[:, :, 2],
+                        out=np.zeros_like(mask_window[:, :, 2]),
+                        where=mask_window[:, :, 2] != 0,
+                    )
+                    + max(
+                        0.8,
+                        3
+                        * np.std(
+                            np.divide(
+                                mask_window[:, :, 0],
+                                mask_window[:, :, 2],
+                                out=np.zeros_like(mask_window[:, :, 2]),
+                                where=mask_window[:, :, 2] != 0,
+                            )
+                        ),
+                    )
                 )
 
-                condition_2 = np.divide(input_image[i, j, 0],input_image[i, j, 2],out=np.array((0),dtype=np.float32),where=input_image[i,j,2]!=0) > np.mean(
+                condition_2 = np.divide(
+                    input_image[i, j, 0],
+                    input_image[i, j, 2],
+                    out=np.array((0), dtype=np.float32),
+                    where=input_image[i, j, 2] != 0,
+                ) > np.mean(
                     mask_window[:, :, 0]
                     + max(
                         0.08,
@@ -830,7 +968,15 @@ def Schroeder_conditions(input_image : np.ndarray,
                     )
                 )
 
-                condition_3 = np.divide(input_image[i, j, 0],input_image[i, j, 1],out=np.array((0),dtype=np.float32),where=input_image[i,j,1]!=0) > 1.6
+                condition_3 = (
+                    np.divide(
+                        input_image[i, j, 0],
+                        input_image[i, j, 1],
+                        out=np.array((0), dtype=np.float32),
+                        where=input_image[i, j, 1] != 0,
+                    )
+                    > 1.6
+                )
 
                 real_potential_fire_condition = np.logical_and(
                     condition_1, np.logical_and(condition_2, condition_3)
@@ -841,12 +987,10 @@ def Schroeder_conditions(input_image : np.ndarray,
                 else:
                     mask_combined_temp[i, j] = False
 
-
     mask7 = mask_combined_temp
 
     mask_combined = np.logical_or(mask_combined, mask7)
 
-    # mask_broadcasted = np.stack([mask_combined] * 3, axis=-1).astype(np.uint8)*255
     mask_broadcasted = mask_combined.astype(np.float32)
 
     return mask_broadcasted

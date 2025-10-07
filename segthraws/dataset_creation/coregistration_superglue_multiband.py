@@ -1,19 +1,17 @@
 """
 Copyright notice:
-Source code obtained from Gabriele Meoni and Roberto del Prete in THRawS (https://arxiv.org/abs/2305.11891) available at: https://github.com/ESA-PhiLab/PyRawS
+Source code obtained from Gabriele Meoni and Roberto del Prete in THRawS
+ (https://arxiv.org/abs/2305.11891) available at: https://github.com/ESA-PhiLab/PyRawS
 @author Cristopher Castro Traba, Ubotica Technologies
 @copyright 2024 see license file for details
 """
 
-
 import torch
-
-from .superglue_models.matching import Matching
-# from ...pyraws.raw.raw_event import Raw_event
-# from ...pyraws.utils.visualization_utils import equalize_tensor
 
 from pyraws.raw.raw_event import Raw_event
 from pyraws.utils.visualization_utils import equalize_tensor
+from .superglue_models.matching import Matching
+
 
 def get_shift_SuperGlue_profiling(
     b0,
@@ -33,8 +31,8 @@ def get_shift_SuperGlue_profiling(
         sinkhorn_iterations (int, optional): number of sinkorn iterations. Defaults to 30.
         requested_bands (list): list containing two bands for which perform the study.
         equalize (bool, optional): if True, equalization is performed. Defaults to True.
-        n_std (int, optional): Outliers are saturated for equalization at histogram_mean*- n_std * histogram_std.
-                               Defaults to 2.
+        n_std (int, optional): Outliers are saturated for equalization at
+        histogram_mean*- n_std * histogram_std. Defaults to 2.
         device (torch.device, optional): torch.device. Defaults to torch.device("cpu").
 
     Returns:
@@ -86,8 +84,9 @@ def get_shift_SuperGlue_profiling(
     mkpts1 = kpts1[matches[valid]]
 
     if len(mkpts1) and len(mkpts0):
-        # shift = torch.tensor([x - y for (x, y) in zip(mkpts1, mkpts0)], device=device)
-        shift = torch.tensor(mkpts1- mkpts0, device=device) #Half the time than line 105
+        shift = torch.tensor(
+            mkpts1 - mkpts0, device=device
+        )  # Half the time than line 105
         shift_v, shift_h = shift[:, 0], shift[:, 1]
         shift_v_mean, shift_v_std = torch.mean(shift_v), torch.std(shift_v)
         shift_h_mean, shift_h_std = torch.mean(shift_h), torch.std(shift_h)
@@ -111,21 +110,21 @@ def get_shift_SuperGlue_profiling(
     return shift_mean
 
 
-
-def SuperGlue_registration(bands_list,event_path,granule_idx,downsampling=True,verbose=False):
-
+def SuperGlue_registration(
+    bands_list, event_path, granule_idx, downsampling=True, verbose=False
+):
+    """Perform SuperGlue coregistration among the bands.
+    Current version only uses the coarse alignment approach"""
     bands_dict = {}
     for band in bands_list:
-        if band in ["B12", "B11","B8A", "B07","B06", "B05"]:
-            bands_dict[band]=20
-        elif band in ["B02", "B03","B04", "B08"]:
-            bands_dict[band]=10
-        elif band in ["B01","B09","B10"]:
-            bands_dict[band]=60
+        if band in ["B12", "B11", "B8A", "B07", "B06", "B05"]:
+            bands_dict[band] = 20
+        elif band in ["B02", "B03", "B04", "B08"]:
+            bands_dict[band] = 10
+        elif band in ["B01", "B09", "B10"]:
+            bands_dict[band] = 60
         else:
-            raise ValueError(
-            "The band ID does not belong to any Sentinel-2 band"
-        )     
+            raise ValueError("The band ID does not belong to any Sentinel-2 band")
     raw_event = Raw_event()
 
     # Read event from data
@@ -137,92 +136,17 @@ def SuperGlue_registration(bands_list,event_path,granule_idx,downsampling=True,v
         verbose=False,
     )
 
-    raw_granule = raw_event.get_granule(granule_idx).as_tensor()
-
-
-
-    bands_shifts = []
     coarse_status = False
-    # try:
-    #     # for i,(band,resol) in enumerate(bands_dict.items()):
-    #     #     first_band = next(iter(bands_dict))
-    #     #     if i>0:
-    #     #         if band in ["B12", "B11","B10"]:
-    #     #             if first_band in ["B12", "B11","B10"]:
-    #     #                 bands_shift = get_shift_SuperGlue_profiling(rotate(raw_granule[:,:,0].unsqueeze(2),180).squeeze(2),rotate(raw_granule[:,:,i].unsqueeze(2),180).squeeze(2))
-    #     #             else:
-    #     #                 bands_shift = get_shift_SuperGlue_profiling(raw_granule[:,:,0],rotate(raw_granule[:,:,i].unsqueeze(2),180).squeeze(2))
-    #     #         else:
-    #     #             if first_band in ["B12", "B11","B10"]:
-    #     #                 bands_shift = get_shift_SuperGlue_profiling(rotate(raw_granule[:,:,0].unsqueeze(2),180).squeeze(2),raw_granule[:,:,i])
-    #     #             else:
-    #     #                 bands_shift = get_shift_SuperGlue_profiling(raw_granule[:,:,0],raw_granule[:,:,i])
-
-
-
-    #     #         # resolution_factor = bands_dict[first_band]/resol
-    #     #         resolution_factor = max(bands_dict.values())/resol
-    #     #         bands_shifts.append(bands_shift*resolution_factor)
-
-
-    #     bands_01 = get_shift_SuperGlue_profiling(raw_granule[:,:,0],raw_granule[:,:,1])
-    #     bands_12 = get_shift_SuperGlue_profiling(raw_granule[:,:,1],raw_granule[:,:,2])
-    #     bands_23 = get_shift_SuperGlue_profiling(raw_granule[:,:,2],raw_granule[:,:,3])
-    #     bands_34 = get_shift_SuperGlue_profiling(raw_granule[:,:,3],raw_granule[:,:,4])
-    #     bands_45 = get_shift_SuperGlue_profiling(raw_granule[:,:,4],rotate(raw_granule[:,:,5].unsqueeze(2),180).squeeze(2))
-    #     # bands_45 = get_shift_SuperGlue_profiling(raw_granule[:,:,4],raw_granule[:,:,5])
-    #     bands_56 = get_shift_SuperGlue_profiling(rotate(raw_granule[:,:,5].unsqueeze(2),180).squeeze(2),raw_granule[:,:,6])
-    #     bands_67 = get_shift_SuperGlue_profiling(raw_granule[:,:,6],raw_granule[:,:,7])
-    #     bands_78 = get_shift_SuperGlue_profiling(raw_granule[:,:,7],raw_granule[:,:,8])
-    #     bands_89 = get_shift_SuperGlue_profiling(raw_granule[:,:,8],rotate(raw_granule[:,:,9].unsqueeze(2),180).squeeze(2))
-
-    #     bands_shifts = [np.multiply(bands_01,2),
-    #         np.multiply(bands_01,2)+np.multiply(bands_12,2),
-    #         np.multiply(bands_01,2)+np.multiply(bands_12,2)+np.multiply(bands_23,2),
-    #         bands_01+bands_12+bands_23+bands_34,
-    #         bands_01+bands_12+bands_23+bands_34+bands_45,
-    #         bands_01+bands_12+bands_23+bands_34+bands_45+bands_56,
-    #         bands_01+bands_12+bands_23+bands_34+bands_45+bands_56+bands_67,
-    #         bands_01+bands_12+bands_23+bands_34+bands_45+bands_56+bands_67+bands_78,
-    #         bands_01+bands_12+bands_23+bands_34+bands_45+bands_56+bands_67+bands_78+bands_89,
-    #         ]
-
-    #     raw_coreg_granule = raw_event.coarse_coregistration(  # granule index to fine coregister.
-    #         granules_idx=[granule_idx],
-    #         # Search for filling elements # among adjacent Raw granules
-    #         downsampling=downsampling,
-    #         use_complementary_granules=True,
-    #         crop_empty_pixels=False,                            ############################# Crop empty disabled to get always the entire image
-    #         bands_shifts=bands_shifts
-    #     )
-    #     coarse_status = False
-    # except:
-
-    #     raw_coreg_granule = raw_event.coarse_coregistration(  # granule index to coarse coregister.
-    #         granules_idx=[granule_idx],
-    #         # Search for filling elements
-    #         # among adjacent Raw granules
-    #         downsampling=downsampling,
-    #         use_complementary_granules=True,
-    #         crop_empty_pixels=False,                            ############################# Crop empty disabled to get always the entire image
-    #     )
-    #     coarse_status = True
-
 
     raw_coreg_granule = raw_event.coarse_coregistration(  # granule index to coarse coregister.
         granules_idx=[granule_idx],
-        # Search for filling elements
-        # among adjacent Raw granules
         downsampling=downsampling,
         use_complementary_granules=True,
-        crop_empty_pixels=False,                            ############################# Crop empty disabled to get always the entire image
+        crop_empty_pixels=False,  # Crop empty disabled to get always the entire image
         verbose=verbose,
     )
     coarse_status = True
-    
+
     raw_coordinates = raw_coreg_granule.get_granule_coordinates()
 
-
-    return raw_coreg_granule,raw_coordinates,coarse_status
-
-
+    return raw_coreg_granule, raw_coordinates, coarse_status

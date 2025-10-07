@@ -3,11 +3,20 @@ Copyright notice:
 @author Cristopher Castro Traba, Ubotica Technologies
 @copyright 2024 see license file for details
 
-This script contains the definition of the modified U-Nets. These include: Original U-Net, modified original U-Net, modified ResUNet, modified AttUNet, and modified U-Net3+. 
+This script contains the definition of the modified U-Nets.
+These include: Original U-Net, modified original U-Net, modified ResUNet,
+ modified AttUNet, and modified U-Net3+.
 
-- The original U-Net and ResUnet have been designded from scratch from the original U-Net paper: https://arxiv.org/abs/1505.04597
-- The Att-UNet architecture (https://arxiv.org/abs/1804.03999) has been inspired by the code available at: https://github.com/bigmb/Unet-Segmentation-Pytorch-Nest-of-Unets
-- The U-Net3+ architecture (https://arxiv.org/abs/2004.08790) created has been inspired by the official code available at: https://github.com/ZJUGiveLab/UNet-Version
+- The original U-Net and ResUnet have been designded from scratch from
+ the original U-Net paper: https://arxiv.org/abs/1505.04597
+
+- The Att-UNet architecture (https://arxiv.org/abs/1804.03999) created
+ has been inspired by the code available at:
+ https://github.com/bigmb/Unet-Segmentation-Pytorch-Nest-of-Unets
+
+- The U-Net3+ architecture (https://arxiv.org/abs/2004.08790) created
+ has been inspired by the official code available at:
+ https://github.com/ZJUGiveLab/UNet-Version
 
 """
 
@@ -18,46 +27,75 @@ import torch.nn.functional as F
 
 # from __future__ import print_function, division
 
-##################################################################### BLOCKS #####################################################################
+###################################### BLOCKS ######################################
 
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 
-    def __init__(self, in_channels: int, out_channels: int, mid_channels: int = None, kernel_size: int = 3, padding: int = 1, stride: int = 1):
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        mid_channels: int = None,
+        kernel_size: int = 3,
+        padding: int = 1,
+        stride: int = 1,
+    ):
         super().__init__()
         if not mid_channels:
             mid_channels = out_channels
         self.double_conv = nn.Sequential(
-            nn.Conv2d(in_channels, mid_channels, kernel_size=kernel_size, padding=padding, stride = stride, bias=False),
+            nn.Conv2d(
+                in_channels,
+                mid_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+                bias=False,
+            ),
             nn.BatchNorm2d(mid_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(mid_channels, out_channels, kernel_size=kernel_size, padding=padding, stride = stride, bias=False),
+            nn.Conv2d(
+                mid_channels,
+                out_channels,
+                kernel_size=kernel_size,
+                padding=padding,
+                stride=stride,
+                bias=False,
+            ),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):
         return self.double_conv(x)
 
+
 class ResBlock(nn.Module):
-    """ Residual block: (convolution => [BN] => ReLU) * 2 + Residual """
+    """Residual block: (convolution => [BN] => ReLU) * 2 + Residual"""
 
     def __init__(self, in_channels, out_channels, mid_channels=None):
         super().__init__()
         if not mid_channels:
             mid_channels = out_channels
         self.double_conv = nn.Sequential(
-            nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding='same', bias=False),
+            nn.Conv2d(
+                in_channels, mid_channels, kernel_size=3, padding="same", bias=False
+            ),
             nn.BatchNorm2d(mid_channels),
             nn.ReLU(inplace=True),
-            nn.Conv2d(mid_channels, out_channels, kernel_size=3, padding='same', bias=False),
+            nn.Conv2d(
+                mid_channels, out_channels, kernel_size=3, padding="same", bias=False
+            ),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
         self.res_connection = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=1, padding='same', bias=False),
+            nn.Conv2d(
+                in_channels, out_channels, kernel_size=1, padding="same", bias=False
+            ),
             nn.BatchNorm2d(mid_channels),
             # nn.ReLU(inplace=True),
         )
@@ -73,18 +111,19 @@ class ResBlock(nn.Module):
 
         return self.relu(output)
 
+
 class Down(nn.Module):
     """Downscaling with maxpool then double conv"""
 
     def __init__(self, in_channels, out_channels):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
-            nn.MaxPool2d(2),
-            DoubleConv(in_channels, out_channels)
+            nn.MaxPool2d(2), DoubleConv(in_channels, out_channels)
         )
 
     def forward(self, x):
         return self.maxpool_conv(x)
+
 
 class Down_res(nn.Module):
     """Downscaling with maxpool then double conv"""
@@ -92,12 +131,12 @@ class Down_res(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
-            nn.MaxPool2d(2),
-            ResBlock(in_channels, out_channels)
+            nn.MaxPool2d(2), ResBlock(in_channels, out_channels)
         )
 
     def forward(self, x):
         return self.maxpool_conv(x)
+
 
 class Up(nn.Module):
     """Upscaling using DoubleConv"""
@@ -108,7 +147,9 @@ class Up(nn.Module):
         # self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         # self.conv = DoubleConv(in_channels, out_channels, in_channels // 2)
 
-        self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2)
+        self.up = nn.ConvTranspose2d(
+            in_channels, in_channels // 2, kernel_size=2, stride=2
+        )
         self.conv = DoubleConv(in_channels, out_channels)
 
     def forward(self, x1, x2):
@@ -117,13 +158,13 @@ class Up(nn.Module):
         diffY = x2.size()[2] - x1.size()[2]
         diffX = x2.size()[3] - x1.size()[3]
 
-        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
-                        diffY // 2, diffY - diffY // 2])
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
         # if you have padding issues, see
         # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
+
 
 class Up_res(nn.Module):
     """Upscaling using DoubleConv with Residual blocks"""
@@ -134,7 +175,9 @@ class Up_res(nn.Module):
         # self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         # self.conv = ResBlock(in_channels, out_channels, in_channels // 2)
 
-        self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, kernel_size=2, stride=2)
+        self.up = nn.ConvTranspose2d(
+            in_channels, in_channels // 2, kernel_size=2, stride=2
+        )
         self.conv = ResBlock(in_channels, out_channels)
 
     def forward(self, x1, x2):
@@ -143,13 +186,13 @@ class Up_res(nn.Module):
         diffY = x2.size()[2] - x1.size()[2]
         diffX = x2.size()[3] - x1.size()[3]
 
-        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
-                        diffY // 2, diffY - diffY // 2])
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
         # if you have padding issues, see
         # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
+
 
 class OutConv(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -159,21 +202,24 @@ class OutConv(nn.Module):
     def forward(self, x):
         return self.conv(x)
 
+
 class up_attention(nn.Module):
     """
     Up Convolution Block for the Attention Network
     """
+
     def __init__(self, in_ch, out_ch):
         super(up_attention, self).__init__()
         self.up = nn.Sequential(
             nn.Upsample(scale_factor=2),
             nn.Conv2d(in_ch, out_ch, kernel_size=3, stride=1, padding=1, bias=True),
             nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):
         return self.up(x)
+
 
 class Attention_block(nn.Module):
     """
@@ -185,18 +231,18 @@ class Attention_block(nn.Module):
 
         self.W_g = nn.Sequential(
             nn.Conv2d(F_l, F_int, kernel_size=1, stride=1, padding=0, bias=True),
-            nn.BatchNorm2d(F_int)
+            nn.BatchNorm2d(F_int),
         )
 
         self.W_x = nn.Sequential(
             nn.Conv2d(F_g, F_int, kernel_size=1, stride=1, padding=0, bias=True),
-            nn.BatchNorm2d(F_int)
+            nn.BatchNorm2d(F_int),
         )
 
         self.psi = nn.Sequential(
             nn.Conv2d(F_int, 1, kernel_size=1, stride=1, padding=0, bias=True),
             nn.BatchNorm2d(1),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
         self.relu = nn.ReLU(inplace=True)
@@ -209,9 +255,11 @@ class Attention_block(nn.Module):
         out = x * psi
         return out
 
-##################################################################### MODELS #####################################################################
 
-### Original U-Net
+###################################### MODELS ######################################
+
+# Original U-Net
+
 
 class UNet(nn.Module):
     def __init__(self, n_channels, n_classes):
@@ -219,16 +267,16 @@ class UNet(nn.Module):
         self.n_channels = n_channels
         self.n_classes = n_classes
 
-        self.inc = (DoubleConv(n_channels, 64))
-        self.down1 = (Down(64, 128))
-        self.down2 = (Down(128, 256))
-        self.down3 = (Down(256, 512))
-        self.down4 = (Down(512, 1024))
-        self.up1 = (Up(1024, 512))
-        self.up2 = (Up(512, 256))
-        self.up3 = (Up(256, 128))
-        self.up4 = (Up(128, 64))
-        self.outc = (OutConv(64, n_classes))
+        self.inc = DoubleConv(n_channels, 64)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 256)
+        self.down3 = Down(256, 512)
+        self.down4 = Down(512, 1024)
+        self.up1 = Up(1024, 512)
+        self.up2 = Up(512, 256)
+        self.up3 = Up(256, 128)
+        self.up4 = Up(128, 64)
+        self.outc = OutConv(64, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -243,23 +291,25 @@ class UNet(nn.Module):
         logits = self.outc(x)
         return logits
 
-### Modified U-Net without residual blocks
+
+# Modified U-Net without residual blocks
+
 
 class small_UNet(nn.Module):
-    def __init__(self, n_channels, n_classes, n_filters = 64):
+    def __init__(self, n_channels, n_classes, n_filters=64):
         super(small_UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.n_filters = n_filters
 
-        self.inc = (DoubleConv(n_channels, n_filters))
-        self.down1 = (Down(n_filters, n_filters*2))
-        self.down2 = (Down(n_filters*2, n_filters*4))
-        self.down3 = (Down(n_filters*4, n_filters*8))
-        self.up1 = (Up(n_filters*8, n_filters*4))
-        self.up2 = (Up(n_filters*4, n_filters*2))
-        self.up3 = (Up(n_filters*2, n_filters))
-        self.outc = (OutConv(n_filters, n_classes))
+        self.inc = DoubleConv(n_channels, n_filters)
+        self.down1 = Down(n_filters, n_filters * 2)
+        self.down2 = Down(n_filters * 2, n_filters * 4)
+        self.down3 = Down(n_filters * 4, n_filters * 8)
+        self.up1 = Up(n_filters * 8, n_filters * 4)
+        self.up2 = Up(n_filters * 4, n_filters * 2)
+        self.up3 = Up(n_filters * 2, n_filters)
+        self.outc = OutConv(n_filters, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -272,23 +322,25 @@ class small_UNet(nn.Module):
         logits = self.outc(x)
         return logits
 
-### Modified U-Net with residual blocks in the encoder
+
+# Modified U-Net with residual blocks in the encoder
+
 
 class small_ResUNet(nn.Module):
-    def __init__(self, n_channels, n_classes, n_filters = 64):
+    def __init__(self, n_channels, n_classes, n_filters=64):
         super(small_ResUNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = n_classes
         self.n_filters = n_filters
 
-        self.inc = (DoubleConv(n_channels, n_filters))
-        self.down1 = (Down_res(n_filters, n_filters*2))
-        self.down2 = (Down_res(n_filters*2, n_filters*4))
-        self.down3 = (Down_res(n_filters*4, n_filters*8))
-        self.up1 = (Up(n_filters*8, n_filters*4))
-        self.up2 = (Up(n_filters*4, n_filters*2))
-        self.up3 = (Up(n_filters*2, n_filters))
-        self.outc = (OutConv(n_filters, n_classes))
+        self.inc = DoubleConv(n_channels, n_filters)
+        self.down1 = Down_res(n_filters, n_filters * 2)
+        self.down2 = Down_res(n_filters * 2, n_filters * 4)
+        self.down3 = Down_res(n_filters * 4, n_filters * 8)
+        self.up1 = Up(n_filters * 8, n_filters * 4)
+        self.up2 = Up(n_filters * 4, n_filters * 2)
+        self.up3 = Up(n_filters * 2, n_filters)
+        self.outc = OutConv(n_filters, n_classes)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -301,14 +353,17 @@ class small_ResUNet(nn.Module):
         logits = self.outc(x)
         return logits
 
-### Attention U-Net without residual blocks
+
+# Attention U-Net without residual blocks
+
 
 class small_Att_UNet(nn.Module):
     """
     Attention Unet implementation
     Paper: https://arxiv.org/abs/1804.03999
     """
-    def __init__(self, img_ch=3, output_ch=1,n_filters=64):
+
+    def __init__(self, img_ch=3, output_ch=1, n_filters=64):
         super(small_Att_UNet, self).__init__()
 
         n1 = n_filters
@@ -316,12 +371,10 @@ class small_Att_UNet(nn.Module):
 
         self.Maxpool = nn.MaxPool2d(kernel_size=2, stride=2)
 
-
         self.Conv1 = DoubleConv(img_ch, filters[0])
         self.Conv2 = DoubleConv(filters[0], filters[1])
         self.Conv3 = DoubleConv(filters[1], filters[2])
         self.Conv4 = DoubleConv(filters[2], filters[3])
-
 
         self.Up4 = up_attention(filters[3], filters[2])
         self.Att4 = Attention_block(F_g=filters[2], F_l=filters[2], F_int=filters[1])
@@ -336,7 +389,6 @@ class small_Att_UNet(nn.Module):
         self.Up_conv2 = DoubleConv(filters[1], filters[0])
 
         self.Conv = nn.Conv2d(filters[0], output_ch, kernel_size=1, stride=1, padding=0)
-
 
     def forward(self, x):
 
@@ -371,38 +423,39 @@ class small_Att_UNet(nn.Module):
         return out
 
 
-#Modified U-Net 3+
+# Modified U-Net 3+
+
 
 class small_UNet_3Plus(nn.Module):
 
-    def __init__(self, in_channels=3, n_classes=1, feature_scale=4, n_filters = 64, is_deconv=True):
+    def __init__(
+        self, in_channels=3, n_classes=1, feature_scale=4, n_filters=64, is_deconv=True
+    ):
         super(small_UNet_3Plus, self).__init__()
         self.is_deconv = is_deconv
         self.in_channels = in_channels
         self.feature_scale = feature_scale
 
-        filters = [n_filters, n_filters*2, n_filters*4, n_filters*8]
+        filters = [n_filters, n_filters * 2, n_filters * 4, n_filters * 8]
 
-        ## -------------Encoder--------------
-        self.conv1 = DoubleConv(in_channels=self.in_channels,out_channels= filters[0])
+        # -------------Encoder--------------
+        self.conv1 = DoubleConv(in_channels=self.in_channels, out_channels=filters[0])
         self.maxpool1 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv2 = DoubleConv(in_channels= filters[0], out_channels= filters[1])
+        self.conv2 = DoubleConv(in_channels=filters[0], out_channels=filters[1])
         self.maxpool2 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv3 = DoubleConv(in_channels= filters[1], out_channels= filters[2])
+        self.conv3 = DoubleConv(in_channels=filters[1], out_channels=filters[2])
         self.maxpool3 = nn.MaxPool2d(kernel_size=2)
 
-        self.conv4 = DoubleConv(in_channels= filters[2], out_channels= filters[3])
+        self.conv4 = DoubleConv(in_channels=filters[2], out_channels=filters[3])
 
-
-        ## -------------Decoder--------------
+        # -------------Decoder--------------
         self.CatChannels = filters[0]
         self.CatBlocks = 4
         self.UpChannels = self.CatChannels * self.CatBlocks
 
-
-        '''stage 3d'''
+        """stage 3d"""
         # h1->320*320, hd3->80*80, Pooling 4 times
         self.h1_PT_hd3 = nn.MaxPool2d(4, 4, ceil_mode=True)
         self.h1_PT_hd3_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
@@ -421,7 +474,7 @@ class small_UNet_3Plus(nn.Module):
         self.h3_Cat_hd3_relu = nn.ReLU(inplace=True)
 
         # hd4->40*40, hd4->80*80, Upsample 2 times
-        self.hd4_UT_hd3 = nn.Upsample(scale_factor=2, mode='bilinear')  # 14*14
+        self.hd4_UT_hd3 = nn.Upsample(scale_factor=2, mode="bilinear")  # 14*14
         self.hd4_UT_hd3_conv = nn.Conv2d(filters[3], self.CatChannels, 3, padding=1)
         self.hd4_UT_hd3_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd4_UT_hd3_relu = nn.ReLU(inplace=True)
@@ -431,7 +484,7 @@ class small_UNet_3Plus(nn.Module):
         self.bn3d_1 = nn.BatchNorm2d(self.UpChannels)
         self.relu3d_1 = nn.ReLU(inplace=True)
 
-        '''stage 2d '''
+        """stage 2d """
         # h1->320*320, hd2->160*160, Pooling 2 times
         self.h1_PT_hd2 = nn.MaxPool2d(2, 2, ceil_mode=True)
         self.h1_PT_hd2_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
@@ -444,13 +497,15 @@ class small_UNet_3Plus(nn.Module):
         self.h2_Cat_hd2_relu = nn.ReLU(inplace=True)
 
         # hd3->80*80, hd2->160*160, Upsample 2 times
-        self.hd3_UT_hd2 = nn.Upsample(scale_factor=2, mode='bilinear')  # 14*14
-        self.hd3_UT_hd2_conv = nn.Conv2d(self.UpChannels, self.CatChannels, 3, padding=1)
+        self.hd3_UT_hd2 = nn.Upsample(scale_factor=2, mode="bilinear")  # 14*14
+        self.hd3_UT_hd2_conv = nn.Conv2d(
+            self.UpChannels, self.CatChannels, 3, padding=1
+        )
         self.hd3_UT_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd3_UT_hd2_relu = nn.ReLU(inplace=True)
 
         # hd4->40*40, hd2->160*160, Upsample 4 times
-        self.hd4_UT_hd2 = nn.Upsample(scale_factor=4, mode='bilinear')  # 14*14
+        self.hd4_UT_hd2 = nn.Upsample(scale_factor=4, mode="bilinear")  # 14*14
         self.hd4_UT_hd2_conv = nn.Conv2d(filters[3], self.CatChannels, 3, padding=1)
         self.hd4_UT_hd2_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd4_UT_hd2_relu = nn.ReLU(inplace=True)
@@ -460,26 +515,30 @@ class small_UNet_3Plus(nn.Module):
         self.bn2d_1 = nn.BatchNorm2d(self.UpChannels)
         self.relu2d_1 = nn.ReLU(inplace=True)
 
-        '''stage 1d'''
+        """stage 1d"""
         # h1->320*320, hd1->320*320, Concatenation
         self.h1_Cat_hd1_conv = nn.Conv2d(filters[0], self.CatChannels, 3, padding=1)
         self.h1_Cat_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.h1_Cat_hd1_relu = nn.ReLU(inplace=True)
 
         # hd2->160*160, hd1->320*320, Upsample 2 times
-        self.hd2_UT_hd1 = nn.Upsample(scale_factor=2, mode='bilinear')  # 14*14
-        self.hd2_UT_hd1_conv = nn.Conv2d(self.UpChannels, self.CatChannels, 3, padding=1)
+        self.hd2_UT_hd1 = nn.Upsample(scale_factor=2, mode="bilinear")  # 14*14
+        self.hd2_UT_hd1_conv = nn.Conv2d(
+            self.UpChannels, self.CatChannels, 3, padding=1
+        )
         self.hd2_UT_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd2_UT_hd1_relu = nn.ReLU(inplace=True)
 
         # hd3->80*80, hd1->320*320, Upsample 4 times
-        self.hd3_UT_hd1 = nn.Upsample(scale_factor=4, mode='bilinear')  # 14*14
-        self.hd3_UT_hd1_conv = nn.Conv2d(self.UpChannels, self.CatChannels, 3, padding=1)
+        self.hd3_UT_hd1 = nn.Upsample(scale_factor=4, mode="bilinear")  # 14*14
+        self.hd3_UT_hd1_conv = nn.Conv2d(
+            self.UpChannels, self.CatChannels, 3, padding=1
+        )
         self.hd3_UT_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd3_UT_hd1_relu = nn.ReLU(inplace=True)
 
         # hd4->40*40, hd1->320*320, Upsample 8 times
-        self.hd4_UT_hd1 = nn.Upsample(scale_factor=8, mode='bilinear')  # 14*14
+        self.hd4_UT_hd1 = nn.Upsample(scale_factor=8, mode="bilinear")  # 14*14
         self.hd4_UT_hd1_conv = nn.Conv2d(filters[3], self.CatChannels, 3, padding=1)
         self.hd4_UT_hd1_bn = nn.BatchNorm2d(self.CatChannels)
         self.hd4_UT_hd1_relu = nn.ReLU(inplace=True)
@@ -494,9 +553,9 @@ class small_UNet_3Plus(nn.Module):
 
     def forward(self, inputs):
 
-        ## -------------Encoder-------------
+        # -------------Encoder-------------
         h1 = self.conv1(inputs)  # h1->320*320*64
-        
+
         h2 = self.maxpool1(h1)
         h2 = self.conv2(h2)  # h2->160*160*128
 
@@ -504,36 +563,66 @@ class small_UNet_3Plus(nn.Module):
         h3 = self.conv3(h3)  # h3->80*80*256
 
         h4 = self.maxpool3(h3)
-        
+
         hd4 = self.conv4(h4)  # h4->40*40*512
 
+        # -------------Decoder-------------
 
-        ## -------------Decoder-------------
-
-        h1_PT_hd3 = self.h1_PT_hd3_relu(self.h1_PT_hd3_bn(self.h1_PT_hd3_conv(self.h1_PT_hd3(h1))))
-        h2_PT_hd3 = self.h2_PT_hd3_relu(self.h2_PT_hd3_bn(self.h2_PT_hd3_conv(self.h2_PT_hd3(h2))))
+        h1_PT_hd3 = self.h1_PT_hd3_relu(
+            self.h1_PT_hd3_bn(self.h1_PT_hd3_conv(self.h1_PT_hd3(h1)))
+        )
+        h2_PT_hd3 = self.h2_PT_hd3_relu(
+            self.h2_PT_hd3_bn(self.h2_PT_hd3_conv(self.h2_PT_hd3(h2)))
+        )
         h3_Cat_hd3 = self.h3_Cat_hd3_relu(self.h3_Cat_hd3_bn(self.h3_Cat_hd3_conv(h3)))
-        hd4_UT_hd3 = self.hd4_UT_hd3_relu(self.hd4_UT_hd3_bn(self.hd4_UT_hd3_conv(self.hd4_UT_hd3(hd4))))
-        hd3 = self.relu3d_1(self.bn3d_1(self.conv3d_1(
-            torch.cat((h1_PT_hd3, h2_PT_hd3, h3_Cat_hd3, hd4_UT_hd3), 1)))) # hd3->80*80*UpChannels
+        hd4_UT_hd3 = self.hd4_UT_hd3_relu(
+            self.hd4_UT_hd3_bn(self.hd4_UT_hd3_conv(self.hd4_UT_hd3(hd4)))
+        )
+        hd3 = self.relu3d_1(
+            self.bn3d_1(
+                self.conv3d_1(
+                    # hd3->80*80*UpChannels
+                    torch.cat((h1_PT_hd3, h2_PT_hd3, h3_Cat_hd3, hd4_UT_hd3), 1)
+                )
+            )
+        )
 
-        h1_PT_hd2 = self.h1_PT_hd2_relu(self.h1_PT_hd2_bn(self.h1_PT_hd2_conv(self.h1_PT_hd2(h1))))
+        h1_PT_hd2 = self.h1_PT_hd2_relu(
+            self.h1_PT_hd2_bn(self.h1_PT_hd2_conv(self.h1_PT_hd2(h1)))
+        )
         h2_Cat_hd2 = self.h2_Cat_hd2_relu(self.h2_Cat_hd2_bn(self.h2_Cat_hd2_conv(h2)))
-        hd3_UT_hd2 = self.hd3_UT_hd2_relu(self.hd3_UT_hd2_bn(self.hd3_UT_hd2_conv(self.hd3_UT_hd2(hd3))))
-        hd4_UT_hd2 = self.hd4_UT_hd2_relu(self.hd4_UT_hd2_bn(self.hd4_UT_hd2_conv(self.hd4_UT_hd2(hd4))))
-        hd2 = self.relu2d_1(self.bn2d_1(self.conv2d_1(
-            torch.cat((h1_PT_hd2, h2_Cat_hd2, hd3_UT_hd2, hd4_UT_hd2), 1)))) # hd2->160*160*UpChannels
-        # print('chao2',hd2.shape)
+        hd3_UT_hd2 = self.hd3_UT_hd2_relu(
+            self.hd3_UT_hd2_bn(self.hd3_UT_hd2_conv(self.hd3_UT_hd2(hd3)))
+        )
+        hd4_UT_hd2 = self.hd4_UT_hd2_relu(
+            self.hd4_UT_hd2_bn(self.hd4_UT_hd2_conv(self.hd4_UT_hd2(hd4)))
+        )
+        hd2 = self.relu2d_1(
+            self.bn2d_1(
+                self.conv2d_1(
+                    # hd2->160*160*UpChannels
+                    torch.cat((h1_PT_hd2, h2_Cat_hd2, hd3_UT_hd2, hd4_UT_hd2), 1)
+                )
+            )
+        )
 
         h1_Cat_hd1 = self.h1_Cat_hd1_relu(self.h1_Cat_hd1_bn(self.h1_Cat_hd1_conv(h1)))
-        hd2_UT_hd1 = self.hd2_UT_hd1_relu(self.hd2_UT_hd1_bn(self.hd2_UT_hd1_conv(self.hd2_UT_hd1(hd2))))
-        hd3_UT_hd1 = self.hd3_UT_hd1_relu(self.hd3_UT_hd1_bn(self.hd3_UT_hd1_conv(self.hd3_UT_hd1(hd3))))
-        hd4_UT_hd1 = self.hd4_UT_hd1_relu(self.hd4_UT_hd1_bn(self.hd4_UT_hd1_conv(self.hd4_UT_hd1(hd4))))
-        hd1 = self.relu1d_1(self.bn1d_1(self.conv1d_1(
-            torch.cat((h1_Cat_hd1, hd2_UT_hd1, hd3_UT_hd1, hd4_UT_hd1), 1)))) # hd1->320*320*UpChannels
-        # print('chao1',hd1.shape)
+        hd2_UT_hd1 = self.hd2_UT_hd1_relu(
+            self.hd2_UT_hd1_bn(self.hd2_UT_hd1_conv(self.hd2_UT_hd1(hd2)))
+        )
+        hd3_UT_hd1 = self.hd3_UT_hd1_relu(
+            self.hd3_UT_hd1_bn(self.hd3_UT_hd1_conv(self.hd3_UT_hd1(hd3)))
+        )
+        hd4_UT_hd1 = self.hd4_UT_hd1_relu(
+            self.hd4_UT_hd1_bn(self.hd4_UT_hd1_conv(self.hd4_UT_hd1(hd4)))
+        )
+        hd1 = self.relu1d_1(
+            self.bn1d_1(
+                self.conv1d_1(
+                    # hd1->320*320*UpChannels
+                    torch.cat((h1_Cat_hd1, hd2_UT_hd1, hd3_UT_hd1, hd4_UT_hd1), 1)
+                )
+            )
+        )
 
-        # d1 = self.outconv1(hd1)  # d1->320*320*n_classes
-        # return F.sigmoid(d1)
-        
         return self.outconv1(hd1)
