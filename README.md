@@ -1,8 +1,8 @@
 
 
-![GitHub last commit](https://img.shields.io/github/last-commit/CristopherUbotica/SegTHRawS?style=flat-square)
-![GitHub contributors](https://img.shields.io/github/contributors/CristopherUbotica/SegTHRawS?style=flat-square)
-![GitHub issues](https://img.shields.io/github/issues/CristopherUbotica/SegTHRawS?style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/Ubotica/SegTHRawS_ext?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/Ubotica/SegTHRawS_ext?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/Ubotica/SegTHRawS_ext?style=flat-square)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
 
 # SegTHRawS
