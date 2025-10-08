@@ -7,14 +7,11 @@
 
 # SegTHRawS
 
-
-
-**SHARED EXTERNALLY** This repository corresponds to the Master Thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com) for the Space Engineering Department at Delft University of Technology.
+**SHARED EXTERNALLY** This repository corresponds to the Master Thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com) for the Space Engineering Department at Delft University of Technology. As an academic project, it is open to improvements and further development. If you find any bugs, inconsistencies, or have suggestions, please feel free to open an issue.
 
 The Sentinel-2 images are obtained from the [THRawS](https://zenodo.org/records/7908728) (Thermal Hotspots in raw Sentinel-2 data) dataset, which provides a global distribution of raw multispectral images to detect thermal events. Information on how to handle the dataset and process the images is available in its main repository: [PyRawS](https://github.com/ESA-PhiLab/PyRawS).
 
 The Segmentation of Thermal Hotspots in Raw Sentinel-2 data (SegTHRawS) dataset created in this project is available at: [Zenodo](https://zenodo.org/records/14741990).
-
 
 
 ## Content of the repository
@@ -26,9 +23,8 @@ The SegTHRawS repository includes the following directories:
 |                      |   1. dataset_creation: Include the code to create the SegTHRawS and the geographical-split segmentation datasets using the majority voting approach and weakly labeling.                        |
 |                      |   2. model_training: Includes the code to train and test models with PyTorch Lightning.                                                                                                         |
 |                      |   3. fonts: Contains the Charter font used for the figures.                                                                                                                                     |
-| [PyRawS](pyraws/)               | Contains a reduced version of [PyRawS](https://github.com/ESA-PhiLab/PyRawS), needed for the dataset creation process.                                                               |
-| [resources](resources/)         | Contains various resources, such as images for the README.                                                                                                                           |
-| [scripts_and_studies](scripts/) | Contains scripts and code for creating a segmentation dataset from the THRawS dataset and for training segmentation models with PyTorch Lightning:                                   |
+| [pyraws](pyraws/)               | Contains a reduced version of [PyRawS](https://github.com/ESA-PhiLab/PyRawS), needed for the dataset creation process.                                                               |
+| [scripts](scripts/) | Contains scripts and code for creating a segmentation dataset from the THRawS dataset and for training segmentation models with PyTorch Lightning:                                   |
 |                      |   1. dataset_script.py: Python script for creating the SEgTHRawS dataset and the segmentation dataset frot training the models.                                                                 |
 |                      |   2. train_model_script.py: Python script to train and test segmentation models.                                                                                                                |
 |                      |   3. test_model_script.py: Python script to test previously trained segmentation models.                                                                                                        |
