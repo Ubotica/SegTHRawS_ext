@@ -38,7 +38,7 @@ Install SegTHRawS executing the Shell script  [build_env](build_env.sh).
 
 The dataset and models path need to be modified accordingly inside [segthraws/main_paths.py](segthraws/main_paths.py). The dataset path must refer to where the THRawS dataset is located. 
 
-## Database
+## Data availability
 
 The Sentinel-2 images are obtained from the [THRawS](https://zenodo.org/records/7908728) (Thermal Hotspots in raw Sentinel-2 data) dataset, which provides a global distribution of raw multispectral images to detect thermal events. Information on how to handle the dataset and process the images is available in its main repository: [PyRawS](https://github.com/ESA-PhiLab/PyRawS).
 
