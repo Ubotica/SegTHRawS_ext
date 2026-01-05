@@ -7,12 +7,7 @@
 
 # SegTHRawS
 
-**SHARED EXTERNALLY** This repository corresponds to the Master Thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com) for the Space Engineering Department at Delft University of Technology. As an academic project, it is open to improvements and further development. If you find any bugs, inconsistencies, or have suggestions, please feel free to open an issue.
-
-The Sentinel-2 images are obtained from the [THRawS](https://zenodo.org/records/7908728) (Thermal Hotspots in raw Sentinel-2 data) dataset, which provides a global distribution of raw multispectral images to detect thermal events. Information on how to handle the dataset and process the images is available in its main repository: [PyRawS](https://github.com/ESA-PhiLab/PyRawS).
-
-The Segmentation of Thermal Hotspots in Raw Sentinel-2 data (SegTHRawS) dataset created in this project is available at: [Zenodo](https://zenodo.org/records/14741990).
-
+This repository corresponds to the Master Thesis of Cristopher Castro Traba (cristopher.traba@ubotica.com) for the Space Engineering Department at Delft University of Technology. As an academic project, it is open to improvements and further development. If you find any bugs, inconsistencies, or have suggestions, please feel free to open an issue.
 
 ## Content of the repository
 The SegTHRawS repository includes the following directories:
@@ -43,6 +38,11 @@ Install SegTHRawS executing the Shell script  [build_env](build_env.sh).
 
 The dataset and models path need to be modified accordingly inside [segthraws/main_paths.py](segthraws/main_paths.py). The dataset path must refer to where the THRawS dataset is located. 
 
+## Database
+
+The Sentinel-2 images are obtained from the [THRawS](https://zenodo.org/records/7908728) (Thermal Hotspots in raw Sentinel-2 data) dataset, which provides a global distribution of raw multispectral images to detect thermal events. Information on how to handle the dataset and process the images is available in its main repository: [PyRawS](https://github.com/ESA-PhiLab/PyRawS).
+
+The Segmentation of Thermal Hotspots in Raw Sentinel-2 data (SegTHRawS) dataset created in this project is available at: [Zenodo](https://zenodo.org/records/14741990).
 
 ## Contacts
 Created by Cristopher Castro Traba in collaboration with Delft University of Technology, Ubotica Technologies, and ESA $\Phi$-lab.
